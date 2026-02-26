@@ -1,0 +1,69 @@
+@model IEnumerable<ProyectoPlataformaCursos.Models.ViewModels.CursoViewModel>
+
+@{
+    ViewData["Title"] = "Cursos Disponibles";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">Cursos Disponibles</h1>
+
+    @if (User.IsInRole("PROFESOR"))
+    {
+        <div class="mb-3">
+            <a asp-action="MisCursos" class="btn btn-info">Ver Mis Cursos</a>
+        </div>
+    }
+
+    <div class="row">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var curso in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@curso.Titulo</h5>
+                            <p class="card-text">@curso.Descripcion</p>
+                            <p class="text-muted">
+                                <small>Profesor: @curso.NombreProfesor</small><br />
+                                <small>Lecciones: @curso.NumeroLecciones</small>
+                            </p>
+
+                            @if (curso.EstaInscrito)
+                            {
+                                <div class="progress mb-2">
+                                    <div class="progress-bar" role="progressbar" style="width: @curso.ProgresoPercentage%">
+                                        @curso.ProgresoPercentage%
+                                    </div>
+                                </div>
+                                <span class="badge bg-success">Inscrito</span>
+                            }
+                        </div>
+                        <div class="card-footer">
+                            <a asp-action="Details" asp-route-id="@curso.IdCurso" class="btn btn-primary btn-sm">Ver Detalles</a>
+                            
+                            @if (User.IsInRole("ALUMNO") && !curso.EstaInscrito)
+                            {
+                                <form asp-controller="Enrollment" asp-action="Inscribir" method="post" class="d-inline">
+                                    <input type="hidden" name="idCurso" value="@curso.IdCurso" />
+                                    <button type="submit" class="btn btn-success btn-sm">Inscribirse</button>
+                                </form>
+                            }
+                            
+                            @if (curso.EstaInscrito)
+                            {
+                                <a asp-controller="Lesson" asp-action="View" asp-route-cursoId="@curso.IdCurso" class="btn btn-info btn-sm">Ver Lecciones</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info">No hay cursos disponibles en este momento.</div>
+            </div>
+        }
+    </div>
+</div>

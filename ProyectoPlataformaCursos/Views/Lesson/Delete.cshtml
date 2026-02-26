@@ -1,0 +1,44 @@
+@model ProyectoPlataformaCursos.Models.Leccion
+
+@{
+    ViewData["Title"] = "Eliminar Lección";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-danger">Eliminar Lección</h2>
+                    <div class="alert alert-warning">
+                        <strong>¿Estás seguro de que deseas eliminar esta lección?</strong>
+                        <p>Esta acción no se puede deshacer.</p>
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-3">Curso:</dt>
+                        <dd class="col-sm-9">@Model.Curso?.Titulo</dd>
+
+                        <dt class="col-sm-3">Título:</dt>
+                        <dd class="col-sm-9">@Model.Titulo</dd>
+
+                        <dt class="col-sm-3">Orden:</dt>
+                        <dd class="col-sm-9">@Model.Orden</dd>
+
+                        <dt class="col-sm-3">Contenido:</dt>
+                        <dd class="col-sm-9">@Model.Contenido.Substring(0, Math.Min(200, Model.Contenido.Length))...</dd>
+
+                        <dt class="col-sm-3">Fecha de Creación:</dt>
+                        <dd class="col-sm-9">@Model.FechaCreacion.ToShortDateString()</dd>
+                    </dl>
+
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="IdLeccion" />
+                        <button type="submit" class="btn btn-danger">Confirmar Eliminación</button>
+                        <a asp-controller="Course" asp-action="Details" asp-route-id="@Model.IdCurso" class="btn btn-secondary">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

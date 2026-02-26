@@ -1,0 +1,41 @@
+@model ProyectoPlataformaCursos.Models.Curso
+
+@{
+    ViewData["Title"] = "Eliminar Curso";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-danger">Eliminar Curso</h2>
+                    <div class="alert alert-warning">
+                        <strong>¿Estás seguro de que deseas eliminar este curso?</strong>
+                        <p>Esta acción no se puede deshacer y eliminará todas las lecciones asociadas.</p>
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-3">Título:</dt>
+                        <dd class="col-sm-9">@Model.Titulo</dd>
+
+                        <dt class="col-sm-3">Descripción:</dt>
+                        <dd class="col-sm-9">@Model.Descripcion</dd>
+
+                        <dt class="col-sm-3">Fecha de Creación:</dt>
+                        <dd class="col-sm-9">@Model.FechaCreacion.ToShortDateString()</dd>
+
+                        <dt class="col-sm-3">Lecciones:</dt>
+                        <dd class="col-sm-9">@(Model.Lecciones?.Count ?? 0)</dd>
+                    </dl>
+
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="IdCurso" />
+                        <button type="submit" class="btn btn-danger">Confirmar Eliminación</button>
+                        <a asp-action="MisCursos" class="btn btn-secondary">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

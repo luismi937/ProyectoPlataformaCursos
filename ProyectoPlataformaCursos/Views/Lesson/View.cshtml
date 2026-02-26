@@ -1,0 +1,55 @@
+@model IEnumerable<ProyectoPlataformaCursos.Models.ViewModels.LeccionViewModel>
+
+@{
+    ViewData["Title"] = "Lecciones del Curso";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>@ViewBag.CursoTitulo</h1>
+            <p class="lead">Lecciones del curso</p>
+
+            @if (Model != null && Model.Any())
+            {
+                <div class="list-group">
+                    @foreach (var leccion in Model.OrderBy(l => l.Orden))
+                    {
+                        <div class="list-group-item @(leccion.Completado ? "list-group-item-success" : "")">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">
+                                    @leccion.Orden. @leccion.Titulo
+                                    @if (leccion.Completado)
+                                    {
+                                        <span class="badge bg-success">? Completada</span>
+                                    }
+                                </h5>
+                            </div>
+                            <p class="mb-1">@leccion.Contenido.Substring(0, Math.Min(150, leccion.Contenido.Length))...</p>
+                            <div class="mt-2">
+                                <a asp-action="Details" asp-route-id="@leccion.IdLeccion" class="btn btn-primary btn-sm">Ver Lección</a>
+                                
+                                @if (!leccion.Completado)
+                                {
+                                    <form asp-action="MarcarCompletada" method="post" class="d-inline">
+                                        <input type="hidden" name="idLeccion" value="@leccion.IdLeccion" />
+                                        <input type="hidden" name="idCurso" value="@ViewBag.CursoId" />
+                                        <button type="submit" class="btn btn-success btn-sm">Marcar como Completada</button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">Este curso aún no tiene lecciones disponibles.</div>
+            }
+
+            <div class="mt-3">
+                <a asp-controller="Enrollment" asp-action="MisCursos" class="btn btn-secondary">Volver a Mis Cursos</a>
+            </div>
+        </div>
+    </div>
+</div>

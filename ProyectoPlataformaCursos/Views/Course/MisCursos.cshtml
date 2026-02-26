@@ -1,0 +1,54 @@
+@model IEnumerable<ProyectoPlataformaCursos.Models.ViewModels.CursoViewModel>
+
+@{
+    ViewData["Title"] = "Mis Cursos";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">Mis Cursos</h1>
+
+    <div class="mb-3">
+        <a asp-action="Create" class="btn btn-primary">Crear Nuevo Curso</a>
+    </div>
+
+    <div class="row">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var curso in Model)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">@curso.Titulo</h5>
+                            <p class="card-text">@curso.Descripcion</p>
+                            <p class="text-muted">
+                                <small>Lecciones: @curso.NumeroLecciones</small><br />
+                                <small>Estado: 
+                                    @if (curso.Activo)
+                                    {
+                                        <span class="badge bg-success">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Inactivo</span>
+                                    }
+                                </small>
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <a asp-action="Details" asp-route-id="@curso.IdCurso" class="btn btn-info btn-sm">Ver</a>
+                            <a asp-action="Edit" asp-route-id="@curso.IdCurso" class="btn btn-warning btn-sm">Editar</a>
+                            <a asp-action="Delete" asp-route-id="@curso.IdCurso" class="btn btn-danger btn-sm">Eliminar</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info">No has creado ningún curso todavía.</div>
+            </div>
+        }
+    </div>
+</div>

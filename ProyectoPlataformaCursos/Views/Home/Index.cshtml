@@ -1,0 +1,122 @@
+﻿@{
+    ViewData["Title"] = "Plataforma de Cursos";
+}
+
+<div class="container">
+    <div class="jumbotron text-center mt-5 p-5 bg-light rounded">
+        <h1 class="display-3">Bienvenido a la Plataforma de Cursos</h1>
+        <p class="lead">Aprende a tu ritmo con nuestros cursos en línea</p>
+        <hr class="my-4">
+        
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <p class="lead">Hola, @User.Identity.Name</p>
+            
+            @if (User.IsInRole("ALUMNO"))
+            {
+                <a asp-controller="Enrollment" asp-action="MisCursos" class="btn btn-primary btn-lg">Mis Cursos</a>
+                <a asp-controller="Course" asp-action="Index" class="btn btn-success btn-lg">Explorar Cursos</a>
+            }
+            else if (User.IsInRole("PROFESOR"))
+            {
+                <a asp-controller="Course" asp-action="MisCursos" class="btn btn-primary btn-lg">Mis Cursos</a>
+                <a asp-controller="Course" asp-action="Create" class="btn btn-success btn-lg">Crear Curso</a>
+            }
+            else if (User.IsInRole("ADMIN"))
+            {
+                <a asp-controller="Admin" asp-action="Index" class="btn btn-danger btn-lg">Panel de Administración</a>
+                <a asp-controller="Course" asp-action="Index" class="btn btn-primary btn-lg">Ver Cursos</a>
+            }
+        }
+        else
+        {
+            <p class="lead">Comienza tu viaje de aprendizaje hoy</p>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">Registrarse</a>
+            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-lg">Iniciar Sesión</a>
+        }
+    </div>
+
+    @if (ViewBag.CursosDestacados != null)
+    {
+        <div class="mt-5">
+            <h2 class="text-center mb-4">Cursos Destacados</h2>
+            <div class="row">
+                @foreach (var curso in ViewBag.CursosDestacados)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">@curso.Titulo</h5>
+                                <p class="card-text">@curso.Descripcion.Substring(0, Math.Min(100, curso.Descripcion.Length))...</p>
+                                <p class="text-muted">
+                                    <small><i class="bi bi-person"></i> @curso.NombreProfesor</small><br />
+                                    <small><i class="bi bi-book"></i> @curso.NumeroLecciones lecciones</small>
+                                </p>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a asp-controller="Course" asp-action="Details" asp-route-id="@curso.IdCurso" class="btn btn-primary btn-sm w-100">
+                                    Ver Detalles
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="text-center mt-3">
+                <a asp-controller="Course" asp-action="Index" class="btn btn-outline-primary">Ver Todos los Cursos</a>
+            </div>
+        </div>
+    }
+
+    <div class="row mt-5 mb-5">
+        <div class="col-md-4 text-center">
+            <div class="feature-box p-4">
+                <i class="bi bi-book display-4 text-primary"></i>
+                <h3 class="mt-3">Variedad de Cursos</h3>
+                <p>Accede a una amplia selección de cursos en diferentes categorías</p>
+            </div>
+        </div>
+        <div class="col-md-4 text-center">
+            <div class="feature-box p-4">
+                <i class="bi bi-people display-4 text-success"></i>
+                <h3 class="mt-3">Profesores Expertos</h3>
+                <p>Aprende de profesionales con experiencia en sus campos</p>
+            </div>
+        </div>
+        <div class="col-md-4 text-center">
+            <div class="feature-box p-4">
+                <i class="bi bi-trophy display-4 text-warning"></i>
+                <h3 class="mt-3">Aprende a tu Ritmo</h3>
+                <p>Estudia cuando quieras y sigue tu progreso en tiempo real</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .jumbotron {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .jumbotron .btn-outline-primary {
+        color: white;
+        border-color: white;
+    }
+    
+    .jumbotron .btn-outline-primary:hover {
+        background-color: white;
+        color: #667eea;
+    }
+
+    .feature-box {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+    }
+
+    .feature-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+</style>

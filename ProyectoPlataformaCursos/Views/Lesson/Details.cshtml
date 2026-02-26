@@ -1,0 +1,57 @@
+@model ProyectoPlataformaCursos.Models.ViewModels.LeccionViewModel
+
+@{
+    ViewData["Title"] = Model.Titulo;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2>@Model.Titulo</h2>
+                    <p class="mb-0"><small>Curso: @Model.TituloCurso</small></p>
+                </div>
+                <div class="card-body">
+                    <div class="lesson-content">
+                        <p class="lead">@Model.Contenido</p>
+                    </div>
+
+                    @if (Model.Completado)
+                    {
+                        <div class="alert alert-success mt-4">
+                            <i class="bi bi-check-circle"></i> Has completado esta lección
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mt-4">
+                            <form asp-action="MarcarCompletada" method="post">
+                                <input type="hidden" name="idLeccion" value="@Model.IdLeccion" />
+                                <input type="hidden" name="idCurso" value="@Model.IdCurso" />
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-check-circle"></i> Marcar como Completada
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer">
+                    <a asp-action="View" asp-route-cursoId="@Model.IdCurso" class="btn btn-secondary">
+                        Volver a las Lecciones
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .lesson-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+    }
+</style>
