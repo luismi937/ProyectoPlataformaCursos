@@ -1,0 +1,580 @@
+/* ====================================================================
+   TEMA ATLÉTICO DE MADRID - ESTILOS GLOBALES
+   Colores oficiales: Rojo #CE2029 y Blanco #FFFFFF
+   ==================================================================== */
+
+/* ====================================================================
+   VARIABLES CSS (Colores del Atlético)
+   ==================================================================== */
+:root {
+    --atletico-rojo: #CE2029;
+    --atletico-rojo-intenso: #D81920;
+    --atletico-rojo-oscuro: #8B0000;
+    --atletico-blanco: #FFFFFF;
+    --atletico-rosa-claro: #FFE5E7;
+    --atletico-rosa-medio: #FFD1D4;
+}
+
+/* ====================================================================
+   NAVBAR - Header Principal
+   ==================================================================== */
+.navbar-dark.bg-primary,
+.navbar.bg-primary {
+    background: linear-gradient(135deg, var(--atletico-rojo) 0%, var(--atletico-rojo-intenso) 100%) !important;
+    border-bottom: 3px solid var(--atletico-blanco);
+}
+
+.navbar-brand {
+    color: var(--atletico-blanco) !important;
+    font-weight: 700;
+}
+
+.navbar .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600;
+}
+
+.navbar .nav-link:hover {
+    color: var(--atletico-blanco) !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+.navbar .dropdown-menu {
+    border: 2px solid var(--atletico-rojo);
+}
+
+/* ====================================================================
+   BOTONES GLOBALES
+   ==================================================================== */
+.btn-primary {
+    background: linear-gradient(135deg, var(--atletico-rojo) 0%, var(--atletico-rojo-intenso) 100%);
+    border: none;
+    color: var(--atletico-blanco);
+    font-weight: 600;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background: linear-gradient(135deg, var(--atletico-rojo-intenso) 0%, var(--atletico-rojo) 100%);
+    box-shadow: 0 5px 15px rgba(206, 32, 41, 0.5);
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary {
+    border-color: var(--atletico-rojo);
+    color: var(--atletico-rojo);
+    border-width: 2px;
+    font-weight: 600;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--atletico-rojo);
+    border-color: var(--atletico-rojo);
+    color: var(--atletico-blanco);
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--atletico-rojo) 0%, var(--atletico-rojo-intenso) 100%);
+    border: none;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, var(--atletico-rojo-intenso) 0%, var(--atletico-rojo) 100%);
+    box-shadow: 0 5px 15px rgba(206, 32, 41, 0.5);
+}
+
+.btn-secondary {
+    background-color: var(--atletico-blanco);
+    border: 2px solid var(--atletico-rojo);
+    color: var(--atletico-rojo);
+}
+
+.btn-secondary:hover {
+    background-color: var(--atletico-rojo);
+    color: var(--atletico-blanco);
+}
+
+/* ====================================================================
+   CARDS Y CONTENEDORES
+   ==================================================================== */
+.card {
+    border: 2px solid var(--atletico-rojo);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 1rem 3rem rgba(206, 32, 41, 0.3);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--atletico-rojo) 0%, var(--atletico-rojo-intenso) 100%);
+    color: var(--atletico-blanco);
+    font-weight: 700;
+    border-bottom: 2px solid var(--atletico-blanco);
+    position: relative;
+}
+
+/* Efecto rayas en headers */
+.card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 15px,
+        rgba(255, 255, 255, 0.1) 15px,
+        rgba(255, 255, 255, 0.1) 30px
+    );
+    pointer-events: none;
+}
+
+.card-footer {
+    background: linear-gradient(to right, var(--atletico-rosa-claro) 0%, var(--atletico-blanco) 50%, var(--atletico-rosa-claro) 100%);
+    border-top: 2px solid var(--atletico-rojo);
+    color: var(--atletico-rojo-oscuro);
+}
+
+/* ====================================================================
+   JUMBOTRON / HERO SECTION
+   ==================================================================== */
+.jumbotron {
+    background: linear-gradient(135deg, var(--atletico-rojo) 0%, var(--atletico-rojo-intenso) 100%) !important;
+    color: var(--atletico-blanco) !important;
+    border: 3px solid var(--atletico-blanco);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Rayas en jumbotron */
+.jumbotron::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 20px,
+        rgba(255, 255, 255, 0.05) 20px,
+        rgba(255, 255, 255, 0.05) 40px
+    );
+    pointer-events: none;
+}
+
+/* ====================================================================
+   BADGES
+   ==================================================================== */
+.badge.bg-primary,
+.badge.bg-success {
+    background: var(--atletico-rojo) !important;
+}
+
+.badge.bg-danger {
+    background: var(--atletico-rojo-oscuro) !important;
+}
+
+.badge.bg-warning {
+    background: var(--atletico-rosa-medio) !important;
+    color: var(--atletico-rojo-oscuro) !important;
+}
+
+/* ====================================================================
+   FORMS - Inputs y Controles
+   ==================================================================== */
+.form-control,
+.form-select {
+    border: 2px solid var(--atletico-rojo);
+    border-radius: 10px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--atletico-rojo-intenso);
+    box-shadow: 0 0 0 0.2rem rgba(206, 32, 41, 0.25);
+}
+
+.form-label {
+    color: var(--atletico-rojo);
+    font-weight: 600;
+}
+
+.form-floating > .form-control {
+    border: 2px solid var(--atletico-rojo);
+}
+
+.form-floating > .form-control:focus {
+    border-color: var(--atletico-rojo-intenso);
+    box-shadow: 0 0 0 0.2rem rgba(206, 32, 41, 0.25);
+}
+
+/* ====================================================================
+   ALERTS
+   ==================================================================== */
+.alert-success {
+    background: linear-gradient(135deg, var(--atletico-rosa-claro) 0%, var(--atletico-rosa-medio) 100%);
+    border-left: 4px solid var(--atletico-rojo);
+    color: var(--atletico-rojo-oscuro);
+}
+
+.alert-info {
+    background: linear-gradient(135deg, var(--atletico-rosa-claro) 0%, var(--atletico-rosa-medio) 100%);
+    border-left: 4px solid var(--atletico-rojo);
+    color: var(--atletico-rojo-oscuro);
+}
+
+.alert-warning {
+    background: var(--atletico-rosa-medio);
+    border-left: 4px solid var(--atletico-rojo-intenso);
+    color: var(--atletico-rojo-oscuro);
+}
+
+.alert-danger {
+    background: var(--atletico-rojo);
+    border: 2px solid var(--atletico-rojo-oscuro);
+    color: var(--atletico-blanco);
+}
+
+/* ====================================================================
+   BREADCRUMB
+   ==================================================================== */
+.breadcrumb {
+    background: transparent;
+}
+
+.breadcrumb-item a {
+    color: var(--atletico-rojo);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--atletico-rojo-intenso);
+}
+
+.breadcrumb-item.active {
+    color: var(--atletico-rojo-oscuro);
+    font-weight: 600;
+}
+
+/* ====================================================================
+   PAGINATION
+   ==================================================================== */
+.pagination .page-link {
+    color: var(--atletico-rojo);
+    border-color: var(--atletico-rojo);
+}
+
+.pagination .page-link:hover {
+    background-color: var(--atletico-rojo);
+    color: var(--atletico-blanco);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--atletico-rojo);
+    border-color: var(--atletico-rojo);
+}
+
+/* ====================================================================
+   PROGRESS BAR
+   ==================================================================== */
+.progress {
+    background-color: var(--atletico-rosa-claro);
+    border: 1px solid var(--atletico-rojo);
+}
+
+.progress-bar {
+    background: linear-gradient(135deg, var(--atletico-rojo) 0%, var(--atletico-rojo-intenso) 100%);
+}
+
+/* ====================================================================
+   LINKS GLOBALES
+   ==================================================================== */
+a {
+    color: var(--atletico-rojo);
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--atletico-rojo-intenso);
+}
+
+/* ====================================================================
+   TABLES
+   ==================================================================== */
+.table thead {
+    background: linear-gradient(135deg, var(--atletico-rojo) 0%, var(--atletico-rojo-intenso) 100%);
+    color: var(--atletico-blanco);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(206, 32, 41, 0.05);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--atletico-rosa-claro);
+}
+
+/* ====================================================================
+   FOOTER
+   ==================================================================== */
+footer,
+.footer {
+    background: linear-gradient(135deg, var(--atletico-rojo-oscuro) 0%, var(--atletico-rojo) 100%) !important;
+    color: var(--atletico-blanco) !important;
+    border-top: 3px solid var(--atletico-blanco);
+}
+
+footer a,
+.footer a {
+    color: var(--atletico-blanco) !important;
+}
+
+footer a:hover,
+.footer a:hover {
+    color: var(--atletico-rosa-claro) !important;
+}
+
+/* ====================================================================
+   MODALS
+   ==================================================================== */
+.modal-header {
+    background: linear-gradient(135deg, var(--atletico-rojo) 0%, var(--atletico-rojo-intenso) 100%);
+    color: var(--atletico-blanco);
+    border-bottom: 2px solid var(--atletico-blanco);
+}
+
+.modal-footer {
+    border-top: 2px solid var(--atletico-rojo);
+}
+
+/* ====================================================================
+   LIST GROUP
+   ==================================================================== */
+.list-group-item.active {
+    background-color: var(--atletico-rojo);
+    border-color: var(--atletico-rojo);
+}
+
+.list-group-item:hover {
+    background-color: var(--atletico-rosa-claro);
+}
+
+/* ====================================================================
+   DROPDOWN
+   ==================================================================== */
+.dropdown-menu {
+    border: 2px solid var(--atletico-rojo);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--atletico-rosa-claro);
+    color: var(--atletico-rojo);
+}
+
+/* ====================================================================
+   TEXT COLORS
+   ==================================================================== */
+.text-primary {
+    color: var(--atletico-rojo) !important;
+}
+
+.text-success {
+    color: var(--atletico-rojo) !important;
+}
+
+.bg-primary {
+    background: linear-gradient(135deg, var(--atletico-rojo) 0%, var(--atletico-rojo-intenso) 100%) !important;
+}
+
+.bg-success {
+    background-color: var(--atletico-rojo) !important;
+}
+
+/* ====================================================================
+   BORDER UTILITIES
+   ==================================================================== */
+.border-primary {
+    border-color: var(--atletico-rojo) !important;
+}
+
+.border-success {
+    border-color: var(--atletico-rojo) !important;
+}
+
+/* ====================================================================
+   CUSTOM CLASSES - Feature Box
+   ==================================================================== */
+.feature-box {
+    border: 2px solid var(--atletico-rojo);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.feature-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(206, 32, 41, 0.3);
+    border-color: var(--atletico-rojo-intenso);
+}
+
+.feature-box .display-4 {
+    color: var(--atletico-rojo);
+}
+
+/* ====================================================================
+   SPINNER / LOADING
+   ==================================================================== */
+.spinner-border {
+    border-color: var(--atletico-rojo);
+    border-right-color: transparent;
+}
+
+.spinner-border-white {
+    border-color: var(--atletico-blanco);
+    border-right-color: transparent;
+}
+
+/* ====================================================================
+   ICON CIRCLE (usado en varios componentes)
+   ==================================================================== */
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+/* ====================================================================
+   ANIMATIONS
+   ==================================================================== */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-slideInUp {
+    animation: slideInUp 0.5s ease-out;
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* ====================================================================
+   TRANSITIONS GLOBALES
+   ==================================================================== */
+.btn,
+.card,
+.form-control,
+.nav-link,
+a {
+    transition: all 0.3s ease;
+}
+
+/* ====================================================================
+   RESPONSIVE - Mobile First
+   ==================================================================== */
+@media (max-width: 768px) {
+    .card-header {
+        font-size: 1.2rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .icon-circle {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* ====================================================================
+   SCROLLBAR PERSONALIZADA (opcional)
+   ==================================================================== */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--atletico-rosa-claro);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--atletico-rojo);
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--atletico-rojo-intenso);
+}
+
+/* ====================================================================
+   ESTILOS ESPECÍFICOS PARA PÁGINAS
+   ==================================================================== */
+
+/* Home Page */
+.home-hero {
+    background: linear-gradient(135deg, var(--atletico-rojo) 0%, var(--atletico-rojo-intenso) 100%);
+    color: var(--atletico-blanco);
+}
+
+/* Course Cards */
+.course-card {
+    border: 2px solid var(--atletico-rojo);
+}
+
+.course-card:hover {
+    border-color: var(--atletico-rojo-intenso);
+}
+
+/* Lesson Items */
+.lesson-item {
+    border-left: 4px solid var(--atletico-rojo);
+}
+
+.lesson-item.completado {
+    background: var(--atletico-rosa-claro);
+}
+
+/* Admin Dashboard */
+.admin-stat-card {
+    border-top: 4px solid var(--atletico-rojo);
+}
+
+/* ====================================================================
+   FIN DE ESTILOS - TEMA ATLÉTICO DE MADRID
+   ==================================================================== */

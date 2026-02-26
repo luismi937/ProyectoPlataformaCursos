@@ -4,50 +4,463 @@
     ViewData["Title"] = "Editar Lección";
 }
 
-<div class="container mt-4">
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="card-title">Editar Lección</h2>
-                    <p class="text-muted">Curso: @ViewBag.CursoTitulo</p>
+        <div class="col-lg-9 col-md-10">
+            <!-- Header con breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Course" asp-action="MisCursos">
+                            <i class="bi bi-house-door"></i> Mis Cursos
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Course" asp-action="Details" asp-route-id="@Model.IdCurso">
+                            @ViewBag.CursoTitulo
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Editar Lección</li>
+                </ol>
+            </nav>
 
-                    <form asp-action="Edit" method="post">
+            <!-- Card principal con gradiente -->
+            <div class="card shadow-lg border-0 lesson-edit-card">
+                <div class="card-header bg-gradient-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-circle me-3">
+                            <i class="bi bi-pencil-square fs-3"></i>
+                        </div>
+                        <div>
+                            <h2 class="card-title mb-1 fw-bold">Editar Lección</h2>
+                            <p class="mb-0 opacity-90">
+                                <i class="bi bi-book"></i> Curso: <strong>@ViewBag.CursoTitulo</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="Edit" method="post" id="editLessonForm">
                         <input type="hidden" asp-for="IdLeccion" />
                         <input type="hidden" asp-for="IdCurso" />
                         <input type="hidden" asp-for="FechaCreacion" />
 
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                        <div class="form-group mb-3">
-                            <label asp-for="Titulo" class="form-label"></label>
-                            <input asp-for="Titulo" class="form-control" />
-                            <span asp-validation-for="Titulo" class="text-danger"></span>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label asp-for="Contenido" class="form-label"></label>
-                            <textarea asp-for="Contenido" class="form-control" rows="10"></textarea>
-                            <span asp-validation-for="Contenido" class="text-danger"></span>
+                        <!-- Campo Título -->
+                        <div class="form-floating mb-4">
+                            <input asp-for="Titulo" 
+                                   class="form-control form-control-lg" 
+                                   id="floatingTitulo"
+                                   placeholder="Título de la lección"
+                                   maxlength="200" />
+                            <label for="floatingTitulo">
+                                <i class="bi bi-type"></i> Título de la Lección
+                            </label>
+                            <span asp-validation-for="Titulo" class="text-danger small"></span>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i> Máximo 200 caracteres
+                            </div>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label asp-for="Orden" class="form-label"></label>
-                            <input asp-for="Orden" class="form-control" type="number" min="1" />
-                            <span asp-validation-for="Orden" class="text-danger"></span>
+                        <!-- Campo Contenido con contador -->
+                        <div class="mb-4">
+                            <label for="contenidoTextarea" class="form-label fw-bold">
+                                <i class="bi bi-file-text"></i> Contenido de la Lección
+                            </label>
+                            <textarea asp-for="Contenido" 
+                                      class="form-control" 
+                                      id="contenidoTextarea"
+                                      rows="12"
+                                      placeholder="Escribe el contenido detallado de la lección aquí..."
+                                      maxlength="4000"></textarea>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span asp-validation-for="Contenido" class="text-danger small"></span>
+                                <small class="text-muted">
+                                    <span id="charCount">0</span> / 4000 caracteres
+                                </small>
+                            </div>
                         </div>
 
-                        <div class="mt-3">
-                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                            <a asp-controller="Course" asp-action="Details" asp-route-id="@Model.IdCurso" class="btn btn-secondary">Cancelar</a>
+                        <!-- Campo Orden con indicadores visuales -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="Orden" 
+                                           class="form-control" 
+                                           type="number" 
+                                           min="1" 
+                                           max="999"
+                                           id="floatingOrden"
+                                           placeholder="Orden" />
+                                    <label for="floatingOrden">
+                                        <i class="bi bi-sort-numeric-down"></i> Orden de la Lección
+                                    </label>
+                                    <span asp-validation-for="Orden" class="text-danger small"></span>
+                                </div>
+                                <div class="form-text mt-2">
+                                    <i class="bi bi-lightbulb"></i> Define el orden en que aparecerá esta lección en el curso
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-info border-0 h-100 d-flex align-items-center">
+                                    <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                                    <div>
+                                        <strong>Orden actual:</strong> #@Model.Orden
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Separador visual -->
+                        <hr class="my-4">
+
+                        <!-- Botones de acción con iconos -->
+                        <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button type="submit" class="btn btn-primary btn-lg px-4">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    Guardar Cambios
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary btn-lg px-4">
+                                    <i class="bi bi-arrow-counterclockwise me-2"></i>
+                                    Restablecer
+                                </button>
+                            </div>
+                            <a asp-controller="Course" asp-action="Details" asp-route-id="@Model.IdCurso" 
+                               class="btn btn-outline-danger btn-lg px-4">
+                                <i class="bi bi-x-circle me-2"></i>
+                                Cancelar
+                            </a>
                         </div>
                     </form>
+                </div>
+
+                <!-- Footer del card con información adicional -->
+                <div class="card-footer bg-light py-3">
+                    <div class="row text-center text-muted small">
+                        <div class="col-md-4 mb-2 mb-md-0">
+                            <i class="bi bi-calendar3"></i>
+                            <strong>Creada:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy")
+                        </div>
+                        <div class="col-md-4 mb-2 mb-md-0">
+                            <i class="bi bi-clock-history"></i>
+                            <strong>Hora:</strong> @Model.FechaCreacion.ToString("HH:mm")
+                        </div>
+                        <div class="col-md-4">
+                            <i class="bi bi-hash"></i>
+                            <strong>ID:</strong> @Model.IdLeccion
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card de ayuda -->
+            <div class="card border-primary mt-4 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title text-primary">
+                        <i class="bi bi-lightbulb-fill"></i> Consejos para editar tu lección
+                    </h6>
+                    <ul class="mb-0 small">
+                        <li>Usa un título descriptivo y claro para la lección</li>
+                        <li>El contenido debe ser completo pero conciso</li>
+                        <li>Verifica el orden para mantener una secuencia lógica</li>
+                        <li>Los cambios se aplicarán inmediatamente al guardar</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    /* Gradiente para el header - ATLÉTICO DE MADRID */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #CE2029 0%, #D81920 100%);
+    }
+
+    /* Card principal con sombra personalizada */
+    .lesson-edit-card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 3px solid #CE2029;
+    }
+
+    .lesson-edit-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(206, 32, 41, 0.3) !important;
+    }
+
+    /* Círculo de icono */
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        background: rgba(255,255,255,0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255,255,255,0.5);
+    }
+
+    /* Estilo para inputs floating */
+    .form-floating > .form-control {
+        border: 2px solid #CE2029;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .form-floating > .form-control:focus {
+        border-color: #CE2029;
+        box-shadow: 0 0 0 0.2rem rgba(206, 32, 41, 0.25);
+    }
+
+    /* Textarea con borde personalizado */
+    #contenidoTextarea {
+        border: 2px solid #CE2029;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    #contenidoTextarea:focus {
+        border-color: #D81920;
+        box-shadow: 0 0 0 0.2rem rgba(206, 32, 41, 0.25);
+    }
+
+    /* Botones con efectos hover */
+    .btn {
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border-width: 2px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #CE2029 0%, #D81920 100%);
+        border: none;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(206, 32, 41, 0.5);
+        background: linear-gradient(135deg, #D81920 0%, #CE2029 100%);
+    }
+
+    .btn-outline-secondary {
+        border-color: #CE2029;
+        color: #CE2029;
+    }
+
+    .btn-outline-secondary:hover {
+        transform: translateY(-2px);
+        background-color: #CE2029;
+        color: white;
+        border-color: #CE2029;
+    }
+
+    .btn-outline-danger:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Breadcrumb personalizado */
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-item a {
+        color: #CE2029;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+
+    .breadcrumb-item a:hover {
+        color: #D81920;
+    }
+
+    .breadcrumb-item.active {
+        color: #CE2029;
+        font-weight: 600;
+    }
+
+    /* Alert personalizado */
+    .alert-info {
+        background: linear-gradient(135deg, #FFE5E7 0%, #FFD1D4 100%);
+        border-left: 4px solid #CE2029;
+        color: #8B0000;
+    }
+
+    /* Card footer */
+    .card-footer {
+        border-top: 2px solid #CE2029;
+        background: linear-gradient(to right, #FFE5E7 0%, white 50%, #FFE5E7 100%);
+    }
+
+    .card-footer .text-muted {
+        color: #8B0000 !important;
+    }
+
+    /* Card de ayuda */
+    .card.border-primary {
+        border-color: #CE2029 !important;
+        border-width: 2px !important;
+    }
+
+    .card-title.text-primary {
+        color: #CE2029 !important;
+    }
+
+    /* Form text y labels */
+    .form-label {
+        color: #CE2029;
+    }
+
+    .form-text {
+        color: #8B0000;
+    }
+
+    /* Separador */
+    hr {
+        border-color: #CE2029;
+        opacity: 0.3;
+    }
+
+    /* Animación de entrada */
+    @@keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .lesson-edit-card {
+        animation: slideInUp 0.5s ease-out;
+    }
+
+    /* Efecto de rayas del Atlético */
+    .card-header.bg-gradient-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 10px,
+            rgba(255, 255, 255, 0.1) 10px,
+            rgba(255, 255, 255, 0.1) 20px
+        );
+        pointer-events: none;
+    }
+
+    .card-header.bg-gradient-primary {
+        position: relative;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .icon-circle {
+            width: 50px;
+            height: 50px;
+        }
+
+        .card-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .d-flex.gap-3 {
+            flex-direction: column;
+        }
+
+        .d-flex.gap-3 > * {
+            width: 100%;
+        }
+    }
+
+    /* Estilos adicionales del Atlético */
+    .btn-check:checked + .btn-outline-secondary,
+    .btn-outline-secondary.active {
+        background-color: #CE2029;
+        border-color: #CE2029;
+        color: white;
+    }
+
+    /* Input focus con estilo Atlético */
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #CE2029;
+        box-shadow: 0 0 0 0.2rem rgba(206, 32, 41, 0.25);
+    }
+
+    /* Spinner del Atlético */
+    .spinner-border {
+        border-color: white;
+        border-right-color: transparent;
+    }
+</style>
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Contador de caracteres para el textarea
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.getElementById('contenidoTextarea');
+            const charCount = document.getElementById('charCount');
+            
+            function updateCharCount() {
+                const count = textarea.value.length;
+                charCount.textContent = count;
+                
+                // Cambiar color según el porcentaje usado
+                if (count > 3500) {
+                    charCount.className = 'text-danger fw-bold';
+                } else if (count > 3000) {
+                    charCount.className = 'text-warning fw-bold';
+                } else {
+                    charCount.className = 'text-muted';
+                }
+            }
+            
+            // Actualizar al cargar la página
+            updateCharCount();
+            
+            // Actualizar mientras se escribe
+            textarea.addEventListener('input', updateCharCount);
+            
+            // Animación al hacer submit
+            const form = document.getElementById('editLessonForm');
+            form.addEventListener('submit', function(e) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Guardando...';
+                submitBtn.disabled = true;
+            });
+            
+            // Confirmación antes de salir si hay cambios
+            let originalContent = textarea.value;
+            window.addEventListener('beforeunload', function(e) {
+                if (textarea.value !== originalContent) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                    return '';
+                }
+            });
+        });
+    </script>
 }
