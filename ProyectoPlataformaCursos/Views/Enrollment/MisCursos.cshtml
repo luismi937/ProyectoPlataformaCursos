@@ -1,0 +1,47 @@
+@model IEnumerable<ProyectoPlataformaCursos.Models.ViewModels.CursoViewModel>
+
+@{
+    ViewData["Title"] = "Mis Cursos";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">Mis Cursos Inscritos</h1>
+
+    <div class="row">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var curso in Model)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@curso.Titulo</h5>
+                            <p class="card-text">@curso.Descripcion</p>
+                            <p class="text-muted mb-2">
+                                <small>Profesor: @curso.NombreProfesor</small><br />
+                                <small>Lecciones: @curso.NumeroLecciones</small><br />
+                                <small>Precio: @(curso.Precio > 0 ? $"{curso.Precio:N2} €" : "Gratis")</small>
+                            </p>
+
+                            <div class="progress mb-2" style="height: 22px;">
+                                <div class="progress-bar" role="progressbar" style="width: @curso.ProgresoPercentage%">
+                                    @curso.ProgresoPercentage%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a asp-controller="Course" asp-action="Details" asp-route-id="@curso.IdCurso" class="btn btn-info btn-sm">Detalles</a>
+                            <a asp-controller="Lesson" asp-action="View" asp-route-cursoId="@curso.IdCurso" class="btn btn-primary btn-sm">Continuar</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info">Aún no tienes cursos inscritos.</div>
+            </div>
+        }
+    </div>
+</div>

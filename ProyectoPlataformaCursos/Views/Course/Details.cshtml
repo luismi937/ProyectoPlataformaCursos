@@ -71,13 +71,13 @@
                     
                     @if (User.IsInRole("ALUMNO"))
                     {
-                        <form asp-controller="Enrollment" asp-action="Inscribir" method="post">
+                         <form asp-controller="Enrollment" asp-action="Inscribir" method="post" class="payment-form">
                             <input type="hidden" name="idCurso" value="@Model.IdCurso" />
                              @if (Model.Precio > 0)
                              {
                                  <div class="mb-2">
                                      <label class="form-label">Método de pago</label>
-                                     <select name="metodoPago" class="form-select form-select-sm">
+                                     <select name="metodoPago" class="form-select form-select-sm payment-method-select">
                                          <option value="">Selecciona...</option>
                                          @if (Model.AceptaEfectivo)
                                          {
@@ -93,12 +93,54 @@
                                          }
                                      </select>
                                  </div>
+
+                                 <div class="stripe-fields border rounded p-2 mb-2" style="display:none;">
+                                     <small class="text-muted d-block mb-2">Pago con tarjeta</small>
+                                     <input name="cardHolderName" class="form-control form-control-sm mb-2" placeholder="Titular de la tarjeta" />
+                                     <input name="cardNumber" class="form-control form-control-sm mb-2" placeholder="Número de tarjeta" />
+                                     <div class="row g-2">
+                                         <div class="col-6">
+                                             <input name="cardExpiry" class="form-control form-control-sm" placeholder="MM/AA" />
+                                         </div>
+                                         <div class="col-6">
+                                             <input name="cardCvc" class="form-control form-control-sm" placeholder="CVC" />
+                                         </div>
+                                     </div>
+                                 </div>
+
+                                 <div class="transfer-fields border rounded p-2 mb-2" style="display:none;">
+                                     <small class="text-muted d-block mb-2">Datos de transferencia</small>
+                                     <input name="transferAccountHolder" class="form-control form-control-sm mb-2" placeholder="Titular de la cuenta" />
+                                     <input name="transferIban" class="form-control form-control-sm mb-2" placeholder="IBAN" />
+                                     <input name="transferBankName" class="form-control form-control-sm mb-2" placeholder="Banco" />
+                                     <input name="transferReference" class="form-control form-control-sm" placeholder="Concepto / Referencia" />
+                                 </div>
                              }
                             <button type="submit" class="btn btn-success w-100">Inscribirse</button>
                         </form>
                     }
                 </div>
             </div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.payment-form').forEach(function (form) {
+            const methodSelect = form.querySelector('.payment-method-select');
+            const stripeFields = form.querySelector('.stripe-fields');
+            const transferFields = form.querySelector('.transfer-fields');
+            if (!methodSelect) return;
+
+            const toggleFields = function () {
+                const method = methodSelect.value;
+                if (stripeFields) stripeFields.style.display = method === 'TARJETA' ? 'block' : 'none';
+                if (transferFields) transferFields.style.display = method === 'TRANSFERENCIA' ? 'block' : 'none';
+            };
+
+            methodSelect.addEventListener('change', toggleFields);
+            toggleFields();
+        });
+    </script>
+}
         </div>
     </div>
 

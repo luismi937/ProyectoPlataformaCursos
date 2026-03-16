@@ -27,15 +27,28 @@
                             </div>
                             <p class="mb-1">@leccion.Contenido.Substring(0, Math.Min(150, leccion.Contenido.Length))...</p>
                             <div class="mt-2">
-                                <a asp-action="Details" asp-route-id="@leccion.IdLeccion" class="btn btn-primary btn-sm">Ver Lección</a>
+                                @if (leccion.PuedeAcceder)
+                                {
+                                    <a asp-action="Details" asp-route-id="@leccion.IdLeccion" class="btn btn-primary btn-sm">Ver Lección</a>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-secondary btn-sm" disabled>Bloqueada</button>
+                                    <small class="text-muted ms-2">Completa la lección anterior</small>
+                                }
                                 
-                                @if (!leccion.Completado)
+                                @if (!leccion.Completado && leccion.PuedeAcceder)
                                 {
                                     <form asp-action="MarcarCompletada" method="post" class="d-inline">
                                         <input type="hidden" name="idLeccion" value="@leccion.IdLeccion" />
                                         <input type="hidden" name="idCurso" value="@ViewBag.CursoId" />
+                                        <input type="text" name="respuestaUsuario" class="form-control form-control-sm d-inline-block ms-2 me-2" style="width: 220px;" placeholder="Respuesta a la pregunta" />
                                         <button type="submit" class="btn btn-success btn-sm">Marcar como Completada</button>
                                     </form>
+                                    @if (!string.IsNullOrWhiteSpace(leccion.PreguntaEvaluacion))
+                                    {
+                                        <div class="small text-muted mt-2"><strong>Pregunta:</strong> @leccion.PreguntaEvaluacion</div>
+                                    }
                                 }
                             </div>
                         </div>

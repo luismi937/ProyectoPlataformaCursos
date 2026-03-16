@@ -62,6 +62,14 @@ namespace ProyectoPlataformaCursos.Controllers
                 var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
                 curso.IdProfesor = userId;
 
+                if (!User.IsInRole("ADMIN"))
+                {
+                    curso.Precio = 0;
+                    curso.AceptaEfectivo = false;
+                    curso.AceptaTarjeta = false;
+                    curso.AceptaTransferencia = false;
+                }
+
                 await _courseService.CreateCursoAsync(curso);
                 TempData["Success"] = "Curso creado exitosamente";
                 return RedirectToAction(nameof(MisCursos));

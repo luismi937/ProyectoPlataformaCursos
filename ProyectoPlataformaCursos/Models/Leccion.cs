@@ -22,6 +22,12 @@ namespace ProyectoPlataformaCursos.Models
         [StringLength(4000)]
         public string Contenido { get; set; } = string.Empty;
 
+        [StringLength(500)]
+        public string PreguntaEvaluacion { get; set; } = string.Empty;
+
+        [StringLength(250)]
+        public string RespuestaCorrecta { get; set; } = string.Empty;
+
         public int Orden { get; set; }
 
         public DateTime FechaCreacion { get; set; } = DateTime.Now;

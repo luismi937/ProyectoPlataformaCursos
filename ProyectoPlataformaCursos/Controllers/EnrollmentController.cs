@@ -24,10 +24,31 @@ namespace ProyectoPlataformaCursos.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Inscribir(int idCurso, string? metodoPago)
+        public async Task<IActionResult> Inscribir(
+            int idCurso,
+            string? metodoPago,
+            string? cardHolderName,
+            string? cardNumber,
+            string? cardExpiry,
+            string? cardCvc,
+            string? transferAccountHolder,
+            string? transferIban,
+            string? transferBankName,
+            string? transferReference)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var resultado = await _enrollmentService.InscribirUsuarioAsync(userId, idCurso, metodoPago);
+            var resultado = await _enrollmentService.InscribirUsuarioAsync(
+                userId,
+                idCurso,
+                metodoPago,
+                cardHolderName,
+                cardNumber,
+                cardExpiry,
+                cardCvc,
+                transferAccountHolder,
+                transferIban,
+                transferBankName,
+                transferReference);
 
             if (resultado.Success)
             {

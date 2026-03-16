@@ -174,6 +174,8 @@ namespace ProyectoPlataformaCursos.Data
                 entity.HasKey(e => e.IdLeccion);
                 entity.Property(e => e.Titulo).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.Contenido).IsRequired().HasMaxLength(4000);
+                entity.Property(e => e.PreguntaEvaluacion).HasMaxLength(500).HasDefaultValue("¿Qué has aprendido en esta lección?");
+                entity.Property(e => e.RespuestaCorrecta).HasMaxLength(250).HasDefaultValue("OK");
                 entity.Property(e => e.FechaCreacion).HasDefaultValueSql("GETDATE()");
 
                 entity.HasOne(e => e.Curso)

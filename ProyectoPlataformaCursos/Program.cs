@@ -52,6 +52,8 @@ builder.Services.AddScoped<IProgresoRepository, ProgresoRepository>();
 builder.Services.AddScoped<CourseService>();
 builder.Services.AddScoped<EnrollmentService>();
 builder.Services.AddScoped<ProgressService>();
+builder.Services.AddScoped<StripePaymentService>();
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
 builder.Services.AddTransient<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, ProyectoPlataformaCursos.Policies.TieneCursosRequirement>();
 builder.Services.AddTransient<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, ProyectoPlataformaCursos.Policies.AntiguedadRequirement>();
@@ -86,6 +88,177 @@ using (var scope = app.Services.CreateScope())
         IF COL_LENGTH('Inscripciones', 'ImportePagado') IS NULL
             ALTER TABLE Inscripciones ADD ImportePagado decimal(10,2) NOT NULL CONSTRAINT DF_Inscripciones_ImportePagado DEFAULT(0);
     """);
+
+    dbContext.Database.ExecuteSqlRaw("""
+        IF COL_LENGTH('Lecciones', 'PreguntaEvaluacion') IS NULL
+            ALTER TABLE Lecciones ADD PreguntaEvaluacion nvarchar(500) NOT NULL CONSTRAINT DF_Lecciones_PreguntaEvaluacion DEFAULT('¿Qué has aprendido en esta lección?');
+        IF COL_LENGTH('Lecciones', 'RespuestaCorrecta') IS NULL
+            ALTER TABLE Lecciones ADD RespuestaCorrecta nvarchar(250) NOT NULL CONSTRAINT DF_Lecciones_RespuestaCorrecta DEFAULT('OK');
+    """);
+
+    dbContext.Database.ExecuteSqlRaw("""
+        UPDATE Lecciones SET PreguntaEvaluacion = '¿Qué has aprendido en esta lección?' WHERE PreguntaEvaluacion IS NULL OR LTRIM(RTRIM(PreguntaEvaluacion)) = '';
+        UPDATE Lecciones SET RespuestaCorrecta = 'OK' WHERE RespuestaCorrecta IS NULL OR LTRIM(RTRIM(RespuestaCorrecta)) = '';
+    """);
+
+    await SeedDefaultDataAsync(dbContext);
+}
+
+static async Task SeedDefaultDataAsync(ApplicationDbContext dbContext)
+{
+    var admin = await CreateUserIfNotExistsAsync(dbContext, "admin@plataforma.com", "Admin", "Sistema", "ADMIN", "123456");
+    var profesor = await CreateUserIfNotExistsAsync(dbContext, "profesor@plataforma.com", "Carlos", "Profesor", "PROFESOR", "123456");
+    await CreateUserIfNotExistsAsync(dbContext, "alumno@plataforma.com", "Laura", "Alumno", "ALUMNO", "123456");
+
+    await EnsureDefaultCourseAsync(
+        dbContext,
+        "Fundamentos de C#",
+        "Curso inicial para aprender sintaxis, POO y buenas prácticas en C#.",
+        profesor.Id,
+        0,
+        false,
+        false,
+        false,
+        DateTime.Now.AddDays(-10));
+
+    await EnsureDefaultCourseAsync(
+        dbContext,
+        "ASP.NET Core desde cero",
+        "Aprende a crear aplicaciones web modernas con ASP.NET Core y Razor.",
+        profesor.Id,
+        49.99m,
+        true,
+        true,
+        true,
+        DateTime.Now.AddDays(-8));
+
+    await EnsureDefaultCourseAsync(
+        dbContext,
+        "Arquitectura y Seguridad en .NET",
+        "Diseño por capas, autenticación y autorización aplicadas a proyectos reales.",
+        admin.Id,
+        79.99m,
+        false,
+        true,
+        true,
+        DateTime.Now.AddDays(-6));
+
+    var cursosConSemilla = await dbContext.Cursos
+        .Where(c => c.Titulo == "Fundamentos de C#"
+            || c.Titulo == "ASP.NET Core desde cero"
+            || c.Titulo == "Arquitectura y Seguridad en .NET")
+        .ToListAsync();
+
+    foreach (var curso in cursosConSemilla)
+    {
+        var tieneLecciones = await dbContext.Lecciones.AnyAsync(l => l.IdCurso == curso.IdCurso);
+        if (tieneLecciones)
+        {
+            continue;
+        }
+
+        dbContext.Lecciones.AddRange(
+            new Leccion
+            {
+                IdCurso = curso.IdCurso,
+                Titulo = $"Introducción a {curso.Titulo}",
+                Contenido = "En esta lección veremos objetivos, estructura y metodología del curso.",
+                PreguntaEvaluacion = "Escribe la palabra INTRODUCCION para continuar",
+                RespuestaCorrecta = "INTRODUCCION",
+                Orden = 1,
+                FechaCreacion = DateTime.Now
+            },
+            new Leccion
+            {
+                IdCurso = curso.IdCurso,
+                Titulo = "Módulo práctico",
+                Contenido = "Desarrollo práctico con ejercicios guiados y ejemplos aplicados.",
+                PreguntaEvaluacion = "¿Cuál es la palabra clave para crear una clase en C#?",
+                RespuestaCorrecta = "class",
+                Orden = 2,
+                FechaCreacion = DateTime.Now
+            },
+            new Leccion
+            {
+                IdCurso = curso.IdCurso,
+                Titulo = "Proyecto final",
+                Contenido = "Construcción de un mini proyecto para consolidar todo lo aprendido.",
+                PreguntaEvaluacion = "Escribe FINAL para completar el curso",
+                RespuestaCorrecta = "FINAL",
+                Orden = 3,
+                FechaCreacion = DateTime.Now
+            });
+    }
+
+    await dbContext.SaveChangesAsync();
+}
+
+static async Task<Usuario> CreateUserIfNotExistsAsync(
+    ApplicationDbContext dbContext,
+    string email,
+    string nombre,
+    string apellidos,
+    string rol,
+    string password)
+{
+    var existingUser = await dbContext.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
+    if (existingUser != null)
+    {
+        return existingUser;
+    }
+
+    var usuario = new Usuario
+    {
+        Nombre = nombre,
+        Apellidos = apellidos,
+        Email = email,
+        UserName = email,
+        NormalizedUserName = email.ToUpperInvariant(),
+        NormalizedEmail = email.ToUpperInvariant(),
+        Rol = rol,
+        FechaRegistro = DateTime.Now,
+        SecurityStamp = Guid.NewGuid().ToString()
+    };
+
+    var hasher = new PasswordHasher<Usuario>();
+    usuario.PasswordHash = hasher.HashPassword(usuario, password);
+
+    dbContext.Usuarios.Add(usuario);
+    await dbContext.SaveChangesAsync();
+    return usuario;
+}
+
+static async Task EnsureDefaultCourseAsync(
+    ApplicationDbContext dbContext,
+    string titulo,
+    string descripcion,
+    int idProfesor,
+    decimal precio,
+    bool aceptaEfectivo,
+    bool aceptaTarjeta,
+    bool aceptaTransferencia,
+    DateTime fechaCreacion)
+{
+    var exists = await dbContext.Cursos.AnyAsync(c => c.Titulo == titulo);
+    if (exists)
+    {
+        return;
+    }
+
+    dbContext.Cursos.Add(new Curso
+    {
+        Titulo = titulo,
+        Descripcion = descripcion,
+        IdProfesor = idProfesor,
+        Activo = true,
+        Precio = precio,
+        AceptaEfectivo = aceptaEfectivo,
+        AceptaTarjeta = aceptaTarjeta,
+        AceptaTransferencia = aceptaTransferencia,
+        FechaCreacion = fechaCreacion
+    });
+
+    await dbContext.SaveChangesAsync();
 }
 
 // Configure the HTTP request pipeline.

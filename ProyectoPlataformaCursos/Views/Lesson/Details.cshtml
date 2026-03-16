@@ -17,18 +17,35 @@
                         <p class="lead">@Model.Contenido</p>
                     </div>
 
+                    @if (!Model.PuedeAcceder)
+                    {
+                        <div class="alert alert-warning mt-4">
+                            Debes completar la lección anterior para desbloquear esta lección.
+                        </div>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(Model.PreguntaEvaluacion))
+                    {
+                        <div class="alert alert-info mt-4">
+                            <strong>Pregunta de control:</strong> @Model.PreguntaEvaluacion
+                        </div>
+                    }
+
                     @if (Model.Completado)
                     {
                         <div class="alert alert-success mt-4">
                             <i class="bi bi-check-circle"></i> Has completado esta lección
                         </div>
                     }
-                    else
+                    else if (Model.PuedeAcceder)
                     {
                         <div class="mt-4">
                             <form asp-action="MarcarCompletada" method="post">
                                 <input type="hidden" name="idLeccion" value="@Model.IdLeccion" />
                                 <input type="hidden" name="idCurso" value="@Model.IdCurso" />
+                                <div class="mb-3">
+                                    <label class="form-label">Respuesta</label>
+                                    <input type="text" name="respuestaUsuario" class="form-control" placeholder="Escribe tu respuesta" />
+                                </div>
                                 <button type="submit" class="btn btn-success btn-lg">
                                     <i class="bi bi-check-circle"></i> Marcar como Completada
                                 </button>

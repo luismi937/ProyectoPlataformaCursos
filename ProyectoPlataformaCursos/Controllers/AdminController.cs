@@ -25,7 +25,9 @@ namespace ProyectoPlataformaCursos.Controllers
             var totalUsuarios = await _context.Usuarios.CountAsync();
             var totalCursos = await _context.Cursos.CountAsync();
             var totalInscripciones = await _context.Inscripciones.CountAsync();
-            var ingresoTotal = await _context.Inscripciones.SumAsync(i => i.ImportePagado);
+            var ingresoTotal = await _context.Inscripciones
+                .Select(i => (decimal?)i.ImportePagado)
+                .SumAsync() ?? 0m;
             
             ViewBag.TotalUsuarios = totalUsuarios;
             ViewBag.TotalCursos = totalCursos;

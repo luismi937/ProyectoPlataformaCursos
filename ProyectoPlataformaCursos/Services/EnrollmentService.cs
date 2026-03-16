@@ -9,18 +9,32 @@ namespace ProyectoPlataformaCursos.Services
         private readonly IInscripcionRepository _inscripcionRepository;
         private readonly ICursoRepository _cursoRepository;
         private readonly IProgresoRepository _progresoRepository;
+        private readonly StripePaymentService _stripePaymentService;
 
         public EnrollmentService(
             IInscripcionRepository inscripcionRepository,
             ICursoRepository cursoRepository,
-            IProgresoRepository progresoRepository)
+            IProgresoRepository progresoRepository,
+            StripePaymentService stripePaymentService)
         {
             _inscripcionRepository = inscripcionRepository;
             _cursoRepository = cursoRepository;
             _progresoRepository = progresoRepository;
+            _stripePaymentService = stripePaymentService;
         }
 
-        public async Task<(bool Success, string Message)> InscribirUsuarioAsync(int idUsuario, int idCurso, string? metodoPago)
+        public async Task<(bool Success, string Message)> InscribirUsuarioAsync(
+            int idUsuario,
+            int idCurso,
+            string? metodoPago,
+            string? cardHolderName,
+            string? cardNumber,
+            string? cardExpiry,
+            string? cardCvc,
+            string? transferAccountHolder,
+            string? transferIban,
+            string? transferBankName,
+            string? transferReference)
         {
             if (await _inscripcionRepository.ExistsAsync(idUsuario, idCurso))
             {
@@ -49,6 +63,41 @@ namespace ProyectoPlataformaCursos.Services
                 if (!metodosDisponibles.TryGetValue(metodoNormalizado, out var permitido) || !permitido)
                 {
                     return (false, "Selecciona un método de pago válido para este curso");
+                }
+
+                if (metodoNormalizado == "TARJETA")
+                {
+                    if (string.IsNullOrWhiteSpace(cardHolderName)
+                        || string.IsNullOrWhiteSpace(cardNumber)
+                        || string.IsNullOrWhiteSpace(cardExpiry)
+                        || string.IsNullOrWhiteSpace(cardCvc))
+                    {
+                        return (false, "Completa todos los datos de pago con tarjeta para continuar");
+                    }
+
+                    var stripeResult = await _stripePaymentService.CreateAndConfirmPaymentIntentAsync(
+                        curso.Precio,
+                        cardHolderName,
+                        cardNumber,
+                        cardExpiry,
+                        cardCvc,
+                        $"Inscripción curso {curso.Titulo} (Id:{curso.IdCurso})");
+
+                    if (!stripeResult.Success)
+                    {
+                        return (false, stripeResult.Message);
+                    }
+                }
+
+                if (metodoNormalizado == "TRANSFERENCIA")
+                {
+                    if (string.IsNullOrWhiteSpace(transferAccountHolder)
+                        || string.IsNullOrWhiteSpace(transferIban)
+                        || string.IsNullOrWhiteSpace(transferBankName)
+                        || string.IsNullOrWhiteSpace(transferReference))
+                    {
+                        return (false, "Completa todos los datos de transferencia");
+                    }
                 }
             }
             else

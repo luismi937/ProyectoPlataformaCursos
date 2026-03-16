@@ -41,6 +41,23 @@ namespace ProyectoPlataformaCursos.Identity
             return Task.CompletedTask;
         }
 
+        public override Task<string?> GetSecurityStampAsync(Usuario user, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (string.IsNullOrWhiteSpace(user.SecurityStamp))
+            {
+                user.SecurityStamp = $"STAMP-{user.Id}";
+            }
+            return Task.FromResult<string?>(user.SecurityStamp);
+        }
+
+        public override Task SetSecurityStampAsync(Usuario user, string stamp, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            user.SecurityStamp = string.IsNullOrWhiteSpace(stamp) ? $"STAMP-{user.Id}" : stamp;
+            return Task.CompletedTask;
+        }
+
         public override Task<IList<Claim>> GetClaimsAsync(Usuario user, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();

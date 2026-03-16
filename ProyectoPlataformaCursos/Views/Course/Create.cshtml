@@ -31,6 +31,31 @@
                             <label asp-for="Activo" class="form-check-label"></label>
                         </div>
 
+                        @if (User.IsInRole("ADMIN"))
+                        {
+                            <div class="form-group mb-3">
+                                <label asp-for="Precio" class="form-label">Precio (€)</label>
+                                <input asp-for="Precio" type="number" min="0" step="0.01" class="form-control" />
+                                <span asp-validation-for="Precio" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Métodos de pago</label>
+                                <div class="form-check">
+                                    <input asp-for="AceptaEfectivo" class="form-check-input" />
+                                    <label asp-for="AceptaEfectivo" class="form-check-label">Efectivo</label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="AceptaTarjeta" class="form-check-input" />
+                                    <label asp-for="AceptaTarjeta" class="form-check-label">Tarjeta</label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="AceptaTransferencia" class="form-check-input" />
+                                    <label asp-for="AceptaTransferencia" class="form-check-label">Transferencia</label>
+                                </div>
+                            </div>
+                        }
+
                         <div class="mt-3">
                             <button type="submit" class="btn btn-primary">Crear Curso</button>
                             <a asp-action="MisCursos" class="btn btn-secondary">Cancelar</a>

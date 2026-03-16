@@ -57,10 +57,22 @@ namespace ProyectoPlataformaCursos.Services
         {
             curso.FechaCreacion = DateTime.Now;
             curso.Activo = true;
-            curso.Precio = 0;
-            curso.AceptaEfectivo = true;
-            curso.AceptaTarjeta = true;
-            curso.AceptaTransferencia = true;
+            if (curso.Precio < 0)
+            {
+                curso.Precio = 0;
+            }
+
+            if (curso.Precio == 0)
+            {
+                curso.AceptaEfectivo = false;
+                curso.AceptaTarjeta = false;
+                curso.AceptaTransferencia = false;
+            }
+            else if (!curso.AceptaEfectivo && !curso.AceptaTarjeta && !curso.AceptaTransferencia)
+            {
+                curso.AceptaTarjeta = true;
+            }
+
             return await _cursoRepository.CreateAsync(curso);
         }
 

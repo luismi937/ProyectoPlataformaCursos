@@ -116,6 +116,18 @@
                             </div>
                         </div>
 
+                        <div class="mb-4">
+                            <label asp-for="PreguntaEvaluacion" class="form-label fw-bold">Pregunta de control</label>
+                            <input asp-for="PreguntaEvaluacion" class="form-control" placeholder="Pregunta para desbloquear la siguiente lección" />
+                            <span asp-validation-for="PreguntaEvaluacion" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="RespuestaCorrecta" class="form-label fw-bold">Respuesta correcta</label>
+                            <input asp-for="RespuestaCorrecta" class="form-control" placeholder="Respuesta esperada" />
+                            <span asp-validation-for="RespuestaCorrecta" class="text-danger small"></span>
+                        </div>
+
                         <!-- Separador visual -->
                         <hr class="my-4">
 

@@ -56,12 +56,20 @@ namespace ProyectoPlataformaCursos.Controllers
         [Authorize(Roles = "ALUMNO")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MarcarCompletada(int idLeccion, int idCurso)
+        public async Task<IActionResult> MarcarCompletada(int idLeccion, int idCurso, string? respuestaUsuario)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            await _progressService.MarcarLeccionCompletadaAsync(userId, idLeccion);
-            
-            TempData["Success"] = "Lección marcada como completada";
+            var result = await _progressService.MarcarLeccionCompletadaAsync(userId, idLeccion, respuestaUsuario);
+
+            if (result.Success)
+            {
+                TempData["Success"] = result.Message;
+            }
+            else
+            {
+                TempData["Error"] = result.Message;
+            }
+
             return RedirectToAction(nameof(View), new { cursoId = idCurso });
         }
 
@@ -106,6 +114,14 @@ namespace ProyectoPlataformaCursos.Controllers
                 }
 
                 leccion.FechaCreacion = DateTime.Now;
+                if (string.IsNullOrWhiteSpace(leccion.PreguntaEvaluacion))
+                {
+                    leccion.PreguntaEvaluacion = "Escribe OK para completar";
+                }
+                if (string.IsNullOrWhiteSpace(leccion.RespuestaCorrecta))
+                {
+                    leccion.RespuestaCorrecta = "OK";
+                }
                 await _leccionRepository.CreateAsync(leccion);
                 
                 TempData["Success"] = "Lección creada exitosamente";
@@ -166,6 +182,15 @@ namespace ProyectoPlataformaCursos.Controllers
 
             if (ModelState.IsValid)
             {
+                if (string.IsNullOrWhiteSpace(leccion.PreguntaEvaluacion))
+                {
+                    leccion.PreguntaEvaluacion = "Escribe OK para completar";
+                }
+                if (string.IsNullOrWhiteSpace(leccion.RespuestaCorrecta))
+                {
+                    leccion.RespuestaCorrecta = "OK";
+                }
+
                 await _leccionRepository.UpdateAsync(leccion);
                 TempData["Success"] = "Lección actualizada exitosamente";
                 return RedirectToAction("Details", "Course", new { id = leccion.IdCurso });

@@ -38,9 +38,9 @@ namespace ProyectoPlataformaCursos.Controllers
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user != null)
                 {
-                    var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, lockoutOnFailure: false);
+                    var passwordOk = await _userManager.CheckPasswordAsync(user, model.Password);
 
-                    if (result.Succeeded)
+                    if (passwordOk)
                     {
                         await SignInUsuarioAsync(user, model.RememberMe);
 
