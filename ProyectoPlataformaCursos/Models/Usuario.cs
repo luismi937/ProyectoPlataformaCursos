@@ -23,8 +23,7 @@ namespace ProyectoPlataformaCursos.Models
         [StringLength(256)]
         public override string Email { get; set; } = string.Empty;
 
-        [Required]
-        public string PasswordHash { get; set; } = string.Empty;
+        public override string? PasswordHash { get; set; }
 
         [Required]
         [StringLength(20)]

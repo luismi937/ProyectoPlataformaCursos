@@ -24,6 +24,12 @@ namespace ProyectoPlataformaCursos.Models
         [StringLength(20)]
         public string Estado { get; set; } = "ACTIVO";
 
+        [StringLength(20)]
+        public string MetodoPago { get; set; } = "SIN_COSTE";
+
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal ImportePagado { get; set; } = 0;
+
         [ForeignKey("IdUsuario")]
         public virtual Usuario? Usuario { get; set; }
 

@@ -36,7 +36,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f4/Atletico_Madrid_2017_logo.svg/1200px-Atletico_Madrid_2017_logo.svg.png" 
+                    <img src="~/images/atleti.jpg" 
                          alt="Atlético de Madrid" 
                          class="atletico-logo" />
                     Plataforma de Cursos
@@ -120,11 +120,17 @@
                                             }
                                         </span>
                                     </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Perfil">
+                                            <i class="bi bi-person-badge"></i> Mi Perfil
+                                        </a>
+                                    </li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <form asp-controller="Account" asp-action="Logout" method="post">
+                                        <form asp-controller="Account" asp-action="Logout" method="get">
                                             <button type="submit" class="dropdown-item">
                                                 <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                                                <span class="badge bg-secondary ms-1">@User.Identity.Name</span>
                                             </button>
                                         </form>
                                     </li>

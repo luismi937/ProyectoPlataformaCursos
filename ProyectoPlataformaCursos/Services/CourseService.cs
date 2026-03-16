@@ -57,6 +57,10 @@ namespace ProyectoPlataformaCursos.Services
         {
             curso.FechaCreacion = DateTime.Now;
             curso.Activo = true;
+            curso.Precio = 0;
+            curso.AceptaEfectivo = true;
+            curso.AceptaTarjeta = true;
+            curso.AceptaTransferencia = true;
             return await _cursoRepository.CreateAsync(curso);
         }
 
@@ -81,6 +85,17 @@ namespace ProyectoPlataformaCursos.Services
                     $"{curso.Profesor.Nombre} {curso.Profesor.Apellidos}" : "Sin asignar",
                 FechaCreacion = curso.FechaCreacion,
                 Activo = curso.Activo,
+                Precio = curso.Precio,
+                AceptaEfectivo = curso.AceptaEfectivo,
+                AceptaTarjeta = curso.AceptaTarjeta,
+                AceptaTransferencia = curso.AceptaTransferencia,
+                FormasPagoDisponibles = string.Join(", ",
+                    new[]
+                    {
+                        curso.AceptaEfectivo ? "Efectivo" : null,
+                        curso.AceptaTarjeta ? "Tarjeta" : null,
+                        curso.AceptaTransferencia ? "Transferencia" : null
+                    }.Where(x => x != null)),
                 NumeroLecciones = curso.Lecciones?.Count ?? 0,
                 EstaInscrito = false,
                 ProgresoPercentage = 0

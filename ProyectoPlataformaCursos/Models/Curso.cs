@@ -26,6 +26,15 @@ namespace ProyectoPlataformaCursos.Models
 
         public bool Activo { get; set; } = true;
 
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal Precio { get; set; } = 0;
+
+        public bool AceptaEfectivo { get; set; } = true;
+
+        public bool AceptaTarjeta { get; set; } = true;
+
+        public bool AceptaTransferencia { get; set; } = true;
+
         [ForeignKey("IdProfesor")]
         public virtual Usuario? Profesor { get; set; }
 

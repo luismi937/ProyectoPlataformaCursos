@@ -73,6 +73,27 @@
                     {
                         <form asp-controller="Enrollment" asp-action="Inscribir" method="post">
                             <input type="hidden" name="idCurso" value="@Model.IdCurso" />
+                             @if (Model.Precio > 0)
+                             {
+                                 <div class="mb-2">
+                                     <label class="form-label">Método de pago</label>
+                                     <select name="metodoPago" class="form-select form-select-sm">
+                                         <option value="">Selecciona...</option>
+                                         @if (Model.AceptaEfectivo)
+                                         {
+                                             <option value="EFECTIVO">Efectivo</option>
+                                         }
+                                         @if (Model.AceptaTarjeta)
+                                         {
+                                             <option value="TARJETA">Tarjeta</option>
+                                         }
+                                         @if (Model.AceptaTransferencia)
+                                         {
+                                             <option value="TRANSFERENCIA">Transferencia</option>
+                                         }
+                                     </select>
+                                 </div>
+                             }
                             <button type="submit" class="btn btn-success w-100">Inscribirse</button>
                         </form>
                     }

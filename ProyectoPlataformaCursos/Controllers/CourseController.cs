@@ -2,11 +2,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoPlataformaCursos.Models;
 using ProyectoPlataformaCursos.Services;
+using ProyectoPlataformaCursos.Filters;
 using System.Security.Claims;
 
 namespace ProyectoPlataformaCursos.Controllers
 {
-    [Authorize]
+    [AuthorizeUsuarios]
     public class CourseController : Controller
     {
         private readonly CourseService _courseService;
@@ -26,7 +27,7 @@ namespace ProyectoPlataformaCursos.Controllers
             return View(cursos);
         }
 
-        [Authorize(Roles = "PROFESOR")]
+        [Authorize(Roles = "PROFESOR,ADMIN")]
         public async Task<IActionResult> MisCursos()
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -44,14 +45,14 @@ namespace ProyectoPlataformaCursos.Controllers
             return View(curso);
         }
 
-        [Authorize(Roles = "PROFESOR")]
+        [Authorize(Roles = "PROFESOR,ADMIN")]
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        [Authorize(Roles = "PROFESOR")]
+        [Authorize(Roles = "PROFESOR,ADMIN")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Curso curso)
@@ -68,7 +69,7 @@ namespace ProyectoPlataformaCursos.Controllers
             return View(curso);
         }
 
-        [Authorize(Roles = "PROFESOR")]
+        [Authorize(Roles = "PROFESOR,ADMIN")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -87,7 +88,7 @@ namespace ProyectoPlataformaCursos.Controllers
             return View(curso);
         }
 
-        [Authorize(Roles = "PROFESOR")]
+        [Authorize(Roles = "PROFESOR,ADMIN")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Curso curso)
@@ -112,7 +113,8 @@ namespace ProyectoPlataformaCursos.Controllers
             return View(curso);
         }
 
-        [Authorize(Roles = "PROFESOR")]
+        [Authorize(Roles = "PROFESOR,ADMIN")]
+        [Authorize(Policy = "TieneCursosPolicy")]
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -131,7 +133,8 @@ namespace ProyectoPlataformaCursos.Controllers
             return View(curso);
         }
 
-        [Authorize(Roles = "PROFESOR")]
+        [Authorize(Roles = "PROFESOR,ADMIN")]
+        [Authorize(Policy = "TieneCursosPolicy")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

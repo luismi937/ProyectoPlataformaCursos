@@ -20,11 +20,40 @@ namespace ProyectoPlataformaCursos.Services
             _progresoRepository = progresoRepository;
         }
 
-        public async Task<bool> InscribirUsuarioAsync(int idUsuario, int idCurso)
+        public async Task<(bool Success, string Message)> InscribirUsuarioAsync(int idUsuario, int idCurso, string? metodoPago)
         {
             if (await _inscripcionRepository.ExistsAsync(idUsuario, idCurso))
             {
-                return false;
+                return (false, "Ya estás inscrito en este curso");
+            }
+
+            var curso = await _cursoRepository.GetByIdAsync(idCurso);
+            if (curso == null)
+            {
+                return (false, "El curso no existe");
+            }
+
+            string metodoNormalizado = string.IsNullOrWhiteSpace(metodoPago)
+                ? string.Empty
+                : metodoPago.Trim().ToUpperInvariant();
+
+            if (curso.Precio > 0)
+            {
+                var metodosDisponibles = new Dictionary<string, bool>
+                {
+                    ["EFECTIVO"] = curso.AceptaEfectivo,
+                    ["TARJETA"] = curso.AceptaTarjeta,
+                    ["TRANSFERENCIA"] = curso.AceptaTransferencia
+                };
+
+                if (!metodosDisponibles.TryGetValue(metodoNormalizado, out var permitido) || !permitido)
+                {
+                    return (false, "Selecciona un método de pago válido para este curso");
+                }
+            }
+            else
+            {
+                metodoNormalizado = "SIN_COSTE";
             }
 
             var inscripcion = new Inscripcion
@@ -32,11 +61,15 @@ namespace ProyectoPlataformaCursos.Services
                 IdUsuario = idUsuario,
                 IdCurso = idCurso,
                 FechaInscripcion = DateTime.Now,
-                Estado = "ACTIVO"
+                Estado = "ACTIVO",
+                MetodoPago = metodoNormalizado,
+                ImportePagado = curso.Precio
             };
 
             await _inscripcionRepository.CreateAsync(inscripcion);
-            return true;
+            return (true, curso.Precio > 0
+                ? $"Pago registrado ({metodoNormalizado}) e inscripción completada"
+                : "Te has inscrito exitosamente al curso");
         }
 
         public async Task<IEnumerable<CursoViewModel>> GetMisCursosAsync(int idUsuario)
@@ -65,6 +98,17 @@ namespace ProyectoPlataformaCursos.Services
                             $"{inscripcion.Curso.Profesor.Nombre} {inscripcion.Curso.Profesor.Apellidos}" : "Sin asignar",
                         FechaCreacion = inscripcion.Curso.FechaCreacion,
                         Activo = inscripcion.Curso.Activo,
+                        Precio = inscripcion.Curso.Precio,
+                        AceptaEfectivo = inscripcion.Curso.AceptaEfectivo,
+                        AceptaTarjeta = inscripcion.Curso.AceptaTarjeta,
+                        AceptaTransferencia = inscripcion.Curso.AceptaTransferencia,
+                        FormasPagoDisponibles = string.Join(", ",
+                            new[]
+                            {
+                                inscripcion.Curso.AceptaEfectivo ? "Efectivo" : null,
+                                inscripcion.Curso.AceptaTarjeta ? "Tarjeta" : null,
+                                inscripcion.Curso.AceptaTransferencia ? "Transferencia" : null
+                            }.Where(x => x != null)),
                         NumeroLecciones = numLecciones,
                         EstaInscrito = true,
                         ProgresoPercentage = numLecciones > 0 ? (int)((completadas * 100.0) / numLecciones) : 0

@@ -26,7 +26,9 @@
                             <p class="card-text">@curso.Descripcion</p>
                             <p class="text-muted">
                                 <small>Profesor: @curso.NombreProfesor</small><br />
-                                <small>Lecciones: @curso.NumeroLecciones</small>
+                                <small>Lecciones: @curso.NumeroLecciones</small><br />
+                                <small>Precio: @(curso.Precio > 0 ? $"{curso.Precio:N2} €" : "Gratis")</small><br />
+                                <small>Pago: @(!string.IsNullOrWhiteSpace(curso.FormasPagoDisponibles) ? curso.FormasPagoDisponibles : "No requerido")</small>
                             </p>
 
                             @if (curso.EstaInscrito)
@@ -46,6 +48,24 @@
                             {
                                 <form asp-controller="Enrollment" asp-action="Inscribir" method="post" class="d-inline">
                                     <input type="hidden" name="idCurso" value="@curso.IdCurso" />
+                                     @if (curso.Precio > 0)
+                                     {
+                                         <select name="metodoPago" class="form-select form-select-sm d-inline-block mb-2" style="width: 160px;">
+                                             <option value="">Pago...</option>
+                                             @if (curso.AceptaEfectivo)
+                                             {
+                                                 <option value="EFECTIVO">Efectivo</option>
+                                             }
+                                             @if (curso.AceptaTarjeta)
+                                             {
+                                                 <option value="TARJETA">Tarjeta</option>
+                                             }
+                                             @if (curso.AceptaTransferencia)
+                                             {
+                                                 <option value="TRANSFERENCIA">Transferencia</option>
+                                             }
+                                         </select>
+                                     }
                                     <button type="submit" class="btn btn-success btn-sm">Inscribirse</button>
                                 </form>
                             }

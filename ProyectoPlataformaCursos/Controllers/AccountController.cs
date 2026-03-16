@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
 using ProyectoPlataformaCursos.Models;
 using ProyectoPlataformaCursos.Models.ViewModels;
 using System.Security.Claims;
@@ -41,14 +42,7 @@ namespace ProyectoPlataformaCursos.Controllers
 
                     if (result.Succeeded)
                     {
-                        var claims = new List<Claim>
-                        {
-                            new Claim(ClaimTypes.Role, user.Rol),
-                            new Claim(ClaimTypes.Name, $"{user.Nombre} {user.Apellidos}"),
-                            new Claim(ClaimTypes.Email, user.Email)
-                        };
-
-                        await _signInManager.SignInWithClaimsAsync(user, model.RememberMe, claims);
+                        await SignInUsuarioAsync(user, model.RememberMe);
 
                         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         {
@@ -88,6 +82,9 @@ namespace ProyectoPlataformaCursos.Controllers
                     Nombre = model.Nombre,
                     Apellidos = model.Apellidos,
                     Email = model.Email,
+                    UserName = model.Email,
+                    NormalizedUserName = model.Email.ToUpperInvariant(),
+                    NormalizedEmail = model.Email.ToUpperInvariant(),
                     Rol = model.Rol,
                     FechaRegistro = DateTime.Now
                 };
@@ -96,14 +93,7 @@ namespace ProyectoPlataformaCursos.Controllers
 
                 if (result.Succeeded)
                 {
-                    var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Role, usuario.Rol),
-                        new Claim(ClaimTypes.Name, $"{usuario.Nombre} {usuario.Apellidos}"),
-                        new Claim(ClaimTypes.Email, usuario.Email)
-                    };
-
-                    await _signInManager.SignInWithClaimsAsync(usuario, isPersistent: false, claims);
+                    await SignInUsuarioAsync(usuario, rememberMe: false);
                     TempData["Success"] = "Registro exitoso. Bienvenido!";
                     return RedirectToAction("Index", "Home");
                 }
@@ -117,18 +107,64 @@ namespace ProyectoPlataformaCursos.Controllers
             return View(model);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+
+            if (TempData.ContainsKey("controller") && TempData.ContainsKey("action"))
+            {
+                string? controller = TempData["controller"]?.ToString();
+                string? action = TempData["action"]?.ToString();
+
+                if (!string.IsNullOrEmpty(controller) && !string.IsNullOrEmpty(action))
+                {
+                    if (TempData.ContainsKey("id"))
+                    {
+                        string? id = TempData["id"]?.ToString();
+                        return RedirectToAction(action, controller, new { id = id });
+                    }
+                    else
+                    {
+                        return RedirectToAction(action, controller);
+                    }
+                }
+            }
+
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        [ProyectoPlataformaCursos.Filters.AuthorizeUsuarios]
+        public IActionResult Perfil()
+        {
+            return View();
         }
 
         [HttpGet]
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        private async Task SignInUsuarioAsync(Usuario usuario, bool rememberMe)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Role, usuario.Rol),
+                new Claim(ClaimTypes.Name, $"{usuario.Nombre} {usuario.Apellidos}"),
+                new Claim(ClaimTypes.Email, usuario.Email),
+                new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                new Claim("FechaRegistro", usuario.FechaRegistro.ToString("yyyy-MM-dd"))
+            };
+
+            var identity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme, ClaimTypes.Name, ClaimTypes.Role);
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, principal, new AuthenticationProperties
+            {
+                IsPersistent = rememberMe,
+                ExpiresUtc = rememberMe ? DateTimeOffset.UtcNow.AddDays(7) : null
+            });
         }
     }
 }

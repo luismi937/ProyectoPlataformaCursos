@@ -157,6 +157,10 @@ namespace ProyectoPlataformaCursos.Data
                 entity.Property(e => e.Descripcion).IsRequired().HasMaxLength(2000);
                 entity.Property(e => e.FechaCreacion).HasDefaultValueSql("GETDATE()");
                 entity.Property(e => e.Activo).HasDefaultValue(true);
+                entity.Property(e => e.Precio).HasColumnType("decimal(10,2)").HasDefaultValue(0);
+                entity.Property(e => e.AceptaEfectivo).HasDefaultValue(true);
+                entity.Property(e => e.AceptaTarjeta).HasDefaultValue(true);
+                entity.Property(e => e.AceptaTransferencia).HasDefaultValue(true);
 
                 entity.HasOne(e => e.Profesor)
                     .WithMany(u => u.Cursos)
@@ -184,6 +188,8 @@ namespace ProyectoPlataformaCursos.Data
                 entity.HasKey(e => e.IdInscripcion);
                 entity.Property(e => e.FechaInscripcion).HasDefaultValueSql("GETDATE()");
                 entity.Property(e => e.Estado).IsRequired().HasMaxLength(20).HasDefaultValue("ACTIVO");
+                entity.Property(e => e.MetodoPago).HasMaxLength(20).HasDefaultValue("SIN_COSTE");
+                entity.Property(e => e.ImportePagado).HasColumnType("decimal(10,2)").HasDefaultValue(0);
 
                 entity.HasOne(e => e.Usuario)
                     .WithMany(u => u.Inscripciones)

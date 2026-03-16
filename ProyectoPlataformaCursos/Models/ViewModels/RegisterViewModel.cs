@@ -27,6 +27,7 @@ namespace ProyectoPlataformaCursos.Models.ViewModels
         public string ConfirmPassword { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Debe seleccionar un rol")]
+        [RegularExpression("^(ALUMNO|PROFESOR|ADMIN)$", ErrorMessage = "Rol no válido")]
         public string Rol { get; set; } = "ALUMNO";
     }
 }

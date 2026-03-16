@@ -23,6 +23,7 @@
                             <p class="card-text">@curso.Descripcion</p>
                             <p class="text-muted">
                                 <small>Lecciones: @curso.NumeroLecciones</small><br />
+                                <small>Precio: @(curso.Precio > 0 ? $"{curso.Precio:N2} €" : "Gratis")</small><br />
                                 <small>Estado: 
                                     @if (curso.Activo)
                                     {

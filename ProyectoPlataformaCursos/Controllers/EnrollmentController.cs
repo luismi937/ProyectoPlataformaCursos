@@ -24,18 +24,18 @@ namespace ProyectoPlataformaCursos.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Inscribir(int idCurso)
+        public async Task<IActionResult> Inscribir(int idCurso, string? metodoPago)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var resultado = await _enrollmentService.InscribirUsuarioAsync(userId, idCurso);
+            var resultado = await _enrollmentService.InscribirUsuarioAsync(userId, idCurso, metodoPago);
 
-            if (resultado)
+            if (resultado.Success)
             {
-                TempData["Success"] = "Te has inscrito exitosamente al curso";
+                TempData["Success"] = resultado.Message;
             }
             else
             {
-                TempData["Error"] = "Ya estás inscrito en este curso";
+                TempData["Error"] = resultado.Message;
             }
 
             return RedirectToAction("Index", "Course");
