@@ -7,6 +7,12 @@
 <div class="container mt-4">
     <h1 class="mb-4">Cursos Disponibles</h1>
 
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input id="courseSearchInput" type="text" class="form-control" placeholder="Buscar curso por título, profesor o descripción..." />
+        </div>
+    </div>
+
     @if (User.IsInRole("PROFESOR") || User.IsInRole("ADMIN"))
     {
         <div class="mb-3">
@@ -20,7 +26,7 @@
         {
             foreach (var curso in Model)
             {
-                <div class="col-md-4 mb-4">
+                <div class="col-md-4 mb-4 course-item" data-search="@($"{curso.Titulo} {curso.Descripcion} {curso.NombreProfesor}".ToLowerInvariant())">
                     <div class="card h-100">
                         <div class="card-body">
                             <h5 class="card-title">@curso.Titulo</h5>
@@ -67,13 +73,13 @@
                                              }
                                          </select>
 
-                                         <div class="stripe-fields border rounded p-2 mb-2" style="display:none;">
+                                          <div class="stripe-fields border rounded p-2 mb-2" style="display:none;">
                                              <small class="text-muted d-block mb-1">Pago con tarjeta</small>
-                                             <input name="cardHolderName" class="form-control form-control-sm mb-1" placeholder="Titular" />
-                                             <input name="cardNumber" class="form-control form-control-sm mb-1" placeholder="Nº tarjeta" />
+                                              <input name="cardHolderName" class="form-control form-control-sm mb-1" placeholder="Titular" />
+                                              <input name="cardNumber" class="form-control form-control-sm mb-1 card-number" placeholder="Nº tarjeta" inputmode="numeric" maxlength="19" />
                                              <div class="row g-1">
-                                                 <div class="col-6"><input name="cardExpiry" class="form-control form-control-sm" placeholder="MM/AA" /></div>
-                                                 <div class="col-6"><input name="cardCvc" class="form-control form-control-sm" placeholder="CVC" /></div>
+                                                  <div class="col-6"><input name="cardExpiry" class="form-control form-control-sm card-expiry" placeholder="MM/AA" inputmode="numeric" maxlength="5" /></div>
+                                                  <div class="col-6"><input name="cardCvc" class="form-control form-control-sm card-cvc" placeholder="CVC" inputmode="numeric" maxlength="4" /></div>
                                              </div>
                                          </div>
 
@@ -109,10 +115,26 @@
 
 @section Scripts {
     <script>
+        const normalize = (v) => (v || '').toString().toLowerCase().trim();
+
+        const searchInput = document.getElementById('courseSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                const term = normalize(this.value);
+                document.querySelectorAll('.course-item').forEach(function (item) {
+                    const text = item.getAttribute('data-search') || '';
+                    item.style.display = text.includes(term) ? '' : 'none';
+                });
+            });
+        }
+
         document.querySelectorAll('.payment-form').forEach(function (form) {
             const methodSelect = form.querySelector('.payment-method-select');
             const stripeFields = form.querySelector('.stripe-fields');
             const transferFields = form.querySelector('.transfer-fields');
+            const cardNumber = form.querySelector('.card-number');
+            const cardExpiry = form.querySelector('.card-expiry');
+            const cardCvc = form.querySelector('.card-cvc');
             if (!methodSelect) return;
 
             const toggleFields = function () {
@@ -123,6 +145,53 @@
 
             methodSelect.addEventListener('change', toggleFields);
             toggleFields();
+
+            if (cardNumber) {
+                cardNumber.addEventListener('input', function () {
+                    const digits = this.value.replace(/\D/g, '').slice(0, 16);
+                    this.value = digits.replace(/(.{4})/g, '$1 ').trim();
+                });
+            }
+
+            if (cardExpiry) {
+                cardExpiry.addEventListener('input', function () {
+                    const digits = this.value.replace(/\D/g, '').slice(0, 4);
+                    this.value = digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+                });
+            }
+
+            if (cardCvc) {
+                cardCvc.addEventListener('input', function () {
+                    this.value = this.value.replace(/\D/g, '').slice(0, 4);
+                });
+            }
+
+            form.addEventListener('submit', function (e) {
+                const method = methodSelect.value;
+                if (method === 'TARJETA') {
+                    const holder = form.querySelector('input[name="cardHolderName"]')?.value?.trim();
+                    const number = form.querySelector('input[name="cardNumber"]')?.value?.replace(/\s/g, '');
+                    const expiry = form.querySelector('input[name="cardExpiry"]')?.value?.trim();
+                    const cvc = form.querySelector('input[name="cardCvc"]')?.value?.trim();
+
+                    if (!holder || !number || !expiry || !cvc || number.length < 13 || !/^\d{2}\/\d{2}$/.test(expiry)) {
+                        e.preventDefault();
+                        alert('Revisa los datos de pago con tarjeta antes de continuar.');
+                    }
+                }
+
+                if (method === 'TRANSFERENCIA') {
+                    const iban = form.querySelector('input[name="transferIban"]')?.value?.replace(/\s/g, '');
+                    const bank = form.querySelector('input[name="transferBankName"]')?.value?.trim();
+                    const holder = form.querySelector('input[name="transferAccountHolder"]')?.value?.trim();
+                    const reference = form.querySelector('input[name="transferReference"]')?.value?.trim();
+
+                    if (!iban || iban.length < 10 || !bank || !holder || !reference) {
+                        e.preventDefault();
+                        alert('Completa correctamente los datos de transferencia.');
+                    }
+                }
+            });
         });
     </script>
 }

@@ -29,11 +29,29 @@
                         <dd class="col-sm-9">@(Model.Lecciones?.Count ?? 0)</dd>
                     </dl>
 
-                    <form asp-action="Delete" method="post">
+                    <form asp-action="Delete" method="post" id="deleteCourseForm">
                         <input type="hidden" asp-for="IdCurso" />
-                        <button type="submit" class="btn btn-danger">Confirmar Eliminación</button>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">Confirmar Eliminación</button>
                         <a asp-action="MisCursos" class="btn btn-secondary">Cancelar</a>
                     </form>
+
+                    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Confirmar eliminación</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    ¿Seguro que quieres eliminar el curso <strong>@Model.Titulo</strong>? Esta acción es irreversible.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-danger" form="deleteCourseForm">Sí, eliminar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
