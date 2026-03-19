@@ -1,349 +1,165 @@
--- =========================================
--- CREACIÓN DE BASE DE DATOS
--- =========================================
-CREATE DATABASE PlataformaCursos;
+IF DB_ID('PlataformaCursos') IS NULL
+BEGIN
+    CREATE DATABASE PlataformaCursos;
+END
 GO
 
 USE PlataformaCursos;
 GO
 
--- =========================================
--- TABLA USUARIOS
--- =========================================
-CREATE TABLE Usuarios (
-    IdUsuario INT PRIMARY KEY IDENTITY(1,1),
-    Nombre NVARCHAR(100) NOT NULL,
-    Apellidos NVARCHAR(150) NOT NULL,
-    Email NVARCHAR(150) NOT NULL UNIQUE,
-    PasswordHash NVARCHAR(255) NOT NULL,
-    Rol NVARCHAR(20) NOT NULL CHECK (Rol IN ('ALUMNO', 'PROFESOR', 'ADMIN')),
-    FechaRegistro DATETIME DEFAULT GETDATE()
-);
-
--- =========================================
--- TABLA CURSOS
--- =========================================
-CREATE TABLE Cursos (
-    IdCurso INT PRIMARY KEY IDENTITY(1,1),
-    Titulo NVARCHAR(200) NOT NULL,
-    Descripcion NVARCHAR(MAX),
-    IdProfesor INT NOT NULL,
-    FechaCreacion DATETIME DEFAULT GETDATE(),
-    Activo BIT DEFAULT 1,
-
-    CONSTRAINT FK_Curso_Profesor 
-        FOREIGN KEY (IdProfesor) REFERENCES Usuarios(IdUsuario)
-        ON DELETE NO ACTION
-);
-
--- =========================================
--- TABLA LECCIONES
--- =========================================
-CREATE TABLE Lecciones (
-    IdLeccion INT PRIMARY KEY IDENTITY(1,1),
-    IdCurso INT NOT NULL,
-    Titulo NVARCHAR(200) NOT NULL,
-    Contenido NVARCHAR(MAX),
-    Orden INT NOT NULL,
-    FechaCreacion DATETIME DEFAULT GETDATE(),
-
-    CONSTRAINT FK_Leccion_Curso 
-        FOREIGN KEY (IdCurso) REFERENCES Cursos(IdCurso)
-        ON DELETE CASCADE
-);
-
--- =========================================
--- TABLA INSCRIPCIONES
--- =========================================
-CREATE TABLE Inscripciones (
-    IdInscripcion INT PRIMARY KEY IDENTITY(1,1),
-    IdUsuario INT NOT NULL,
-    IdCurso INT NOT NULL,
-    FechaInscripcion DATETIME DEFAULT GETDATE(),
-    Estado NVARCHAR(20) DEFAULT 'ACTIVO' 
-        CHECK (Estado IN ('ACTIVO', 'FINALIZADO', 'CANCELADO')),
-
-    CONSTRAINT FK_Inscripcion_Usuario 
-        FOREIGN KEY (IdUsuario) REFERENCES Usuarios(IdUsuario)
-        ON DELETE CASCADE,
-
-    CONSTRAINT FK_Inscripcion_Curso 
-        FOREIGN KEY (IdCurso) REFERENCES Cursos(IdCurso)
-        ON DELETE CASCADE,
-
-    CONSTRAINT UQ_Usuario_Curso UNIQUE (IdUsuario, IdCurso)
-);
-
--- =========================================
--- TABLA PROGRESO
--- =========================================
-CREATE TABLE Progreso (
-    IdProgreso INT PRIMARY KEY IDENTITY(1,1),
-    IdUsuario INT NOT NULL,
-    IdLeccion INT NOT NULL,
-    Completado BIT DEFAULT 0,
-    FechaUltimaActualizacion DATETIME DEFAULT GETDATE(),
-
-    CONSTRAINT FK_Progreso_Usuario 
-        FOREIGN KEY (IdUsuario) REFERENCES Usuarios(IdUsuario)
-        ON DELETE CASCADE,
-
-    CONSTRAINT FK_Progreso_Leccion 
-        FOREIGN KEY (IdLeccion) REFERENCES Lecciones(IdLeccion)
-        ON DELETE CASCADE,
-
-    CONSTRAINT UQ_Usuario_Leccion UNIQUE (IdUsuario, IdLeccion)
-);
-
-USE PlataformaCursos;
+IF OBJECT_ID('dbo.Usuarios', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Usuarios (
+        IdUsuario INT IDENTITY(1,1) PRIMARY KEY,
+        Nombre NVARCHAR(100) NOT NULL,
+        Apellidos NVARCHAR(150) NOT NULL,
+        Email NVARCHAR(150) NOT NULL UNIQUE,
+        PasswordHash NVARCHAR(255) NOT NULL,
+        Rol NVARCHAR(20) NOT NULL CHECK (Rol IN ('ALUMNO', 'PROFESOR', 'ADMIN')),
+        FechaRegistro DATETIME NOT NULL DEFAULT GETDATE()
+    );
+END
 GO
 
--- =========================================
--- USUARIOS
--- =========================================
-
-INSERT INTO Usuarios (Nombre, Apellidos, Email, PasswordHash, Rol)
-VALUES
-('Admin', 'Sistema', 'admin@plataforma.com', 'HASH_ADMIN', 'ADMIN'),
-
-('Carlos', 'Profesor Lopez', 'carlos.profesor@plataforma.com', 'HASH_PROF1', 'PROFESOR'),
-('Laura', 'Profesor Martinez', 'laura.profesor@plataforma.com', 'HASH_PROF2', 'PROFESOR'),
-
-('Ana', 'Gomez Ruiz', 'ana.alumno@plataforma.com', 'HASH_ALUM1', 'ALUMNO'),
-('David', 'Sanchez Perez', 'david.alumno@plataforma.com', 'HASH_ALUM2', 'ALUMNO'),
-('Lucia', 'Fernandez Torres', 'lucia.alumno@plataforma.com', 'HASH_ALUM3', 'ALUMNO');
-
--- =========================================
--- CURSOS
--- =========================================
-
-INSERT INTO Cursos (Titulo, Descripcion, IdProfesor)
-VALUES
-('ASP.NET Core desde Cero', 'Aprende a desarrollar aplicaciones web con ASP.NET Core MVC.', 2),
-('SQL Server Profesional', 'Domina consultas avanzadas y optimización en SQL Server.', 3),
-('Entity Framework Core', 'Aprende ORM con EF Core paso a paso.', 2);
-
--- =========================================
--- LECCIONES
--- =========================================
-
--- Curso 1 (ASP.NET)
-INSERT INTO Lecciones (IdCurso, Titulo, Contenido, Orden)
-VALUES
-(1, 'Introducción a ASP.NET Core', 'Contenido HTML o Markdown...', 1),
-(1, 'Modelo MVC', 'Explicación del patrón MVC...', 2),
-(1, 'Razor Views', 'Cómo funcionan las Razor Views...', 3);
-
--- Curso 2 (SQL Server)
-INSERT INTO Lecciones (IdCurso, Titulo, Contenido, Orden)
-VALUES
-(2, 'Fundamentos de SQL', 'SELECT, INSERT, UPDATE...', 1),
-(2, 'Joins y Subconsultas', 'INNER JOIN, LEFT JOIN...', 2),
-(2, 'Optimización de consultas', 'Índices y planes de ejecución...', 3);
-
--- Curso 3 (EF Core)
-INSERT INTO Lecciones (IdCurso, Titulo, Contenido, Orden)
-VALUES
-(3, 'Introducción a EF Core', 'DbContext y modelos...', 1),
-(3, 'Migraciones', 'Cómo funcionan las migraciones...', 2),
-(3, 'Relaciones y Fluent API', 'Configuración avanzada...', 3);
-
--- =========================================
--- INSCRIPCIONES
--- =========================================
-
-INSERT INTO Inscripciones (IdUsuario, IdCurso, Estado)
-VALUES
-(4, 1, 'ACTIVO'),
-(4, 2, 'ACTIVO'),
-(5, 1, 'FINALIZADO'),
-(6, 3, 'ACTIVO'),
-(5, 2, 'ACTIVO');
-
--- =========================================
--- PROGRESO
--- =========================================
-
--- Ana (IdUsuario 4) - Curso 1
-INSERT INTO Progreso (IdUsuario, IdLeccion, Completado)
-VALUES
-(4, 1, 1),
-(4, 2, 1),
-(4, 3, 0);
-
--- Ana - Curso 2
-INSERT INTO Progreso (IdUsuario, IdLeccion, Completado)
-VALUES
-(4, 4, 1),
-(4, 5, 0),
-(4, 6, 0);
-
--- David (IdUsuario 5) - Curso 1 (completado)
-INSERT INTO Progreso (IdUsuario, IdLeccion, Completado)
-VALUES
-(5, 1, 1),
-(5, 2, 1),
-(5, 3, 1);
-
--- Lucia (IdUsuario 6) - Curso 3
-INSERT INTO Progreso (IdUsuario, IdLeccion, Completado)
-VALUES
-(6, 7, 1),
-(6, 8, 0),
-(6, 9, 0);
-
--- David - Curso 2
-INSERT INTO Progreso (IdUsuario, IdLeccion, Completado)
-VALUES
-(5, 4, 1),
-(5, 5, 1),
-(5, 6, 0);
-
-USE PlataformaCursos;
+IF OBJECT_ID('dbo.Cursos', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Cursos (
+        IdCurso INT IDENTITY(1,1) PRIMARY KEY,
+        Titulo NVARCHAR(200) NOT NULL,
+        Descripcion NVARCHAR(MAX) NULL,
+        IdProfesor INT NOT NULL,
+        FechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+        Activo BIT NOT NULL DEFAULT 1,
+        Precio DECIMAL(10,2) NOT NULL DEFAULT 0,
+        AceptaEfectivo BIT NOT NULL DEFAULT 1,
+        AceptaTarjeta BIT NOT NULL DEFAULT 1,
+        AceptaTransferencia BIT NOT NULL DEFAULT 1,
+        CONSTRAINT FK_Curso_Profesor FOREIGN KEY (IdProfesor) REFERENCES dbo.Usuarios(IdUsuario) ON DELETE NO ACTION
+    );
+END
 GO
 
-DELETE FROM Usuarios;
+IF OBJECT_ID('dbo.Lecciones', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Lecciones (
+        IdLeccion INT IDENTITY(1,1) PRIMARY KEY,
+        IdCurso INT NOT NULL,
+        Titulo NVARCHAR(200) NOT NULL,
+        Contenido NVARCHAR(MAX) NULL,
+        PreguntaEvaluacion NVARCHAR(500) NOT NULL DEFAULT '¿Qué has aprendido en esta lección?',
+        RespuestaCorrecta NVARCHAR(250) NOT NULL DEFAULT 'OK',
+        Orden INT NOT NULL,
+        FechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+        CONSTRAINT FK_Leccion_Curso FOREIGN KEY (IdCurso) REFERENCES dbo.Cursos(IdCurso) ON DELETE CASCADE
+    );
+END
 GO
 
-INSERT INTO Usuarios (Nombre, Apellidos, Email, PasswordHash, Rol)
-VALUES
-(
-'Administrador',
-'Sistema',
-'admin@plataforma.com',
-'AQAAAAEAACcQAAAAEPzFakeHashAdminExample1234567890=',
-'ADMIN'
-),
-(
-'Pedro',
-'Profesor García',
-'profesor@plataforma.com',
-'AQAAAAEAACcQAAAAEPzFakeHashProfesorExample1234567=',
-'PROFESOR'
-),
-(
-'Laura',
-'Alumno Martínez',
-'alumno@plataforma.com',
-'AQAAAAEAACcQAAAAEPzFakeHashAlumnoExample12345678=',
-'ALUMNO'
-);
-
-USE PlataformaCursos;
+IF OBJECT_ID('dbo.Inscripciones', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Inscripciones (
+        IdInscripcion INT IDENTITY(1,1) PRIMARY KEY,
+        IdUsuario INT NOT NULL,
+        IdCurso INT NOT NULL,
+        FechaInscripcion DATETIME NOT NULL DEFAULT GETDATE(),
+        Estado NVARCHAR(20) NOT NULL DEFAULT 'ACTIVO' CHECK (Estado IN ('ACTIVO', 'FINALIZADO', 'CANCELADO')),
+        MetodoPago NVARCHAR(20) NOT NULL DEFAULT 'SIN_COSTE',
+        ImportePagado DECIMAL(10,2) NOT NULL DEFAULT 0,
+        CONSTRAINT FK_Inscripcion_Usuario FOREIGN KEY (IdUsuario) REFERENCES dbo.Usuarios(IdUsuario) ON DELETE CASCADE,
+        CONSTRAINT FK_Inscripcion_Curso FOREIGN KEY (IdCurso) REFERENCES dbo.Cursos(IdCurso) ON DELETE CASCADE,
+        CONSTRAINT UQ_Usuario_Curso UNIQUE (IdUsuario, IdCurso)
+    );
+END
 GO
 
---------------------------------------------------
--- USUARIOS (SI NO EXISTEN)
---------------------------------------------------
+IF OBJECT_ID('dbo.Progreso', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Progreso (
+        IdProgreso INT IDENTITY(1,1) PRIMARY KEY,
+        IdUsuario INT NOT NULL,
+        IdLeccion INT NOT NULL,
+        Completado BIT NOT NULL DEFAULT 0,
+        FechaUltimaActualizacion DATETIME NOT NULL DEFAULT GETDATE(),
+        CONSTRAINT FK_Progreso_Usuario FOREIGN KEY (IdUsuario) REFERENCES dbo.Usuarios(IdUsuario) ON DELETE CASCADE,
+        CONSTRAINT FK_Progreso_Leccion FOREIGN KEY (IdLeccion) REFERENCES dbo.Lecciones(IdLeccion) ON DELETE CASCADE,
+        CONSTRAINT UQ_Usuario_Leccion UNIQUE (IdUsuario, IdLeccion)
+    );
+END
+GO
 
-IF NOT EXISTS (SELECT 1 FROM Usuarios WHERE Email = 'admin@plataforma.com')
-INSERT INTO Usuarios (Nombre, Apellidos, Email, PasswordHash, Rol)
-VALUES ('Admin', 'Sistema', 'admin@plataforma.com', 'Admin123', 'ADMIN');
+IF NOT EXISTS (SELECT 1 FROM dbo.Usuarios WHERE Email = 'admin@plataforma.com')
+INSERT INTO dbo.Usuarios (Nombre, Apellidos, Email, PasswordHash, Rol)
+VALUES ('Admin', 'Sistema', 'admin@plataforma.com', 'HASH_ADMIN', 'ADMIN');
 
-IF NOT EXISTS (SELECT 1 FROM Usuarios WHERE Email = 'profesor@plataforma.com')
-INSERT INTO Usuarios (Nombre, Apellidos, Email, PasswordHash, Rol)
-VALUES ('Juan', 'Pérez Profesor', 'profesor@plataforma.com', 'Profe123', 'PROFESOR');
+IF NOT EXISTS (SELECT 1 FROM dbo.Usuarios WHERE Email = 'profesor@plataforma.com')
+INSERT INTO dbo.Usuarios (Nombre, Apellidos, Email, PasswordHash, Rol)
+VALUES ('Carlos', 'Profesor', 'profesor@plataforma.com', 'HASH_PROF', 'PROFESOR');
 
-IF NOT EXISTS (SELECT 1 FROM Usuarios WHERE Email = 'alumno@plataforma.com')
-INSERT INTO Usuarios (Nombre, Apellidos, Email, PasswordHash, Rol)
-VALUES ('Ana', 'García Alumna', 'alumno@plataforma.com', 'Alumno123', 'ALUMNO');
+IF NOT EXISTS (SELECT 1 FROM dbo.Usuarios WHERE Email = 'alumno@plataforma.com')
+INSERT INTO dbo.Usuarios (Nombre, Apellidos, Email, PasswordHash, Rol)
+VALUES ('Laura', 'Alumno', 'alumno@plataforma.com', 'HASH_ALUM', 'ALUMNO');
 
+DECLARE @AdminId INT = (SELECT IdUsuario FROM dbo.Usuarios WHERE Email = 'admin@plataforma.com');
+DECLARE @ProfesorId INT = (SELECT IdUsuario FROM dbo.Usuarios WHERE Email = 'profesor@plataforma.com');
+DECLARE @AlumnoId INT = (SELECT IdUsuario FROM dbo.Usuarios WHERE Email = 'alumno@plataforma.com');
 
---------------------------------------------------
--- VARIABLES PARA IDS
---------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM dbo.Cursos WHERE Titulo = 'ASP.NET Core desde Cero')
+INSERT INTO dbo.Cursos (Titulo, Descripcion, IdProfesor, Activo, Precio, AceptaEfectivo, AceptaTarjeta, AceptaTransferencia)
+VALUES ('ASP.NET Core desde Cero', 'Aprende a desarrollar aplicaciones web con ASP.NET Core MVC.', @ProfesorId, 1, 49.99, 1, 1, 1);
 
-DECLARE @ProfesorId INT = (SELECT IdUsuario FROM Usuarios WHERE Email = 'profesor@plataforma.com');
-DECLARE @AlumnoId INT = (SELECT IdUsuario FROM Usuarios WHERE Email = 'alumno@plataforma.com');
+IF NOT EXISTS (SELECT 1 FROM dbo.Cursos WHERE Titulo = 'SQL Server Profesional')
+INSERT INTO dbo.Cursos (Titulo, Descripcion, IdProfesor, Activo, Precio, AceptaEfectivo, AceptaTarjeta, AceptaTransferencia)
+VALUES ('SQL Server Profesional', 'Domina consultas avanzadas y optimización en SQL Server.', @ProfesorId, 1, 39.99, 1, 1, 1);
 
+IF NOT EXISTS (SELECT 1 FROM dbo.Cursos WHERE Titulo = 'Entity Framework Core')
+INSERT INTO dbo.Cursos (Titulo, Descripcion, IdProfesor, Activo, Precio, AceptaEfectivo, AceptaTarjeta, AceptaTransferencia)
+VALUES ('Entity Framework Core', 'Aprende ORM con EF Core paso a paso.', @AdminId, 1, 29.99, 0, 1, 1);
 
---------------------------------------------------
--- CURSOS
---------------------------------------------------
+DECLARE @CursoAsp INT = (SELECT IdCurso FROM dbo.Cursos WHERE Titulo = 'ASP.NET Core desde Cero');
+DECLARE @CursoSql INT = (SELECT IdCurso FROM dbo.Cursos WHERE Titulo = 'SQL Server Profesional');
+DECLARE @CursoEf INT = (SELECT IdCurso FROM dbo.Cursos WHERE Titulo = 'Entity Framework Core');
 
-IF NOT EXISTS (SELECT 1 FROM Cursos WHERE Titulo = 'Curso ASP.NET Core')
-INSERT INTO Cursos (Titulo, Descripcion, IdProfesor)
-VALUES ('Curso ASP.NET Core',
-        'Aprende a crear aplicaciones web con ASP.NET Core MVC.',
-        @ProfesorId);
+IF NOT EXISTS (SELECT 1 FROM dbo.Lecciones WHERE IdCurso = @CursoAsp AND Orden = 1)
+INSERT INTO dbo.Lecciones (IdCurso, Titulo, Contenido, PreguntaEvaluacion, RespuestaCorrecta, Orden)
+VALUES (@CursoAsp, 'Introducción a ASP.NET Core', 'Contenido inicial del curso ASP.NET Core.', 'Escribe INTRODUCCION', 'INTRODUCCION', 1);
 
-IF NOT EXISTS (SELECT 1 FROM Cursos WHERE Titulo = 'Curso SQL Server')
-INSERT INTO Cursos (Titulo, Descripcion, IdProfesor)
-VALUES ('Curso SQL Server',
-        'Aprende bases de datos relacionales y consultas avanzadas.',
-        @ProfesorId);
+IF NOT EXISTS (SELECT 1 FROM dbo.Lecciones WHERE IdCurso = @CursoAsp AND Orden = 2)
+INSERT INTO dbo.Lecciones (IdCurso, Titulo, Contenido, PreguntaEvaluacion, RespuestaCorrecta, Orden)
+VALUES (@CursoAsp, 'Modelo MVC', 'Explicación del patrón MVC.', '¿Palabra clave para crear clase en C#?', 'class', 2);
 
+IF NOT EXISTS (SELECT 1 FROM dbo.Lecciones WHERE IdCurso = @CursoAsp AND Orden = 3)
+INSERT INTO dbo.Lecciones (IdCurso, Titulo, Contenido, PreguntaEvaluacion, RespuestaCorrecta, Orden)
+VALUES (@CursoAsp, 'Razor Views', 'Cómo funcionan las Razor Views.', 'Escribe FINAL', 'FINAL', 3);
 
---------------------------------------------------
--- VARIABLES CURSOS
---------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM dbo.Lecciones WHERE IdCurso = @CursoSql AND Orden = 1)
+INSERT INTO dbo.Lecciones (IdCurso, Titulo, Contenido, PreguntaEvaluacion, RespuestaCorrecta, Orden)
+VALUES (@CursoSql, 'Fundamentos de SQL', 'SELECT, INSERT, UPDATE y DELETE.', 'Escribe SELECT', 'SELECT', 1);
 
-DECLARE @CursoAsp INT = (SELECT IdCurso FROM Cursos WHERE Titulo = 'Curso ASP.NET Core');
-DECLARE @CursoSql INT = (SELECT IdCurso FROM Cursos WHERE Titulo = 'Curso SQL Server');
+IF NOT EXISTS (SELECT 1 FROM dbo.Lecciones WHERE IdCurso = @CursoSql AND Orden = 2)
+INSERT INTO dbo.Lecciones (IdCurso, Titulo, Contenido, PreguntaEvaluacion, RespuestaCorrecta, Orden)
+VALUES (@CursoSql, 'Joins y Subconsultas', 'INNER JOIN, LEFT JOIN y subconsultas.', 'Escribe JOIN', 'JOIN', 2);
 
+IF NOT EXISTS (SELECT 1 FROM dbo.Lecciones WHERE IdCurso = @CursoEf AND Orden = 1)
+INSERT INTO dbo.Lecciones (IdCurso, Titulo, Contenido, PreguntaEvaluacion, RespuestaCorrecta, Orden)
+VALUES (@CursoEf, 'Introducción a EF Core', 'DbContext y modelos.', 'Escribe DBCONTEXT', 'DBCONTEXT', 1);
 
---------------------------------------------------
--- LECCIONES ASP.NET
---------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM dbo.Lecciones WHERE IdCurso = @CursoEf AND Orden = 2)
+INSERT INTO dbo.Lecciones (IdCurso, Titulo, Contenido, PreguntaEvaluacion, RespuestaCorrecta, Orden)
+VALUES (@CursoEf, 'Migraciones', 'Cómo funcionan las migraciones.', 'Escribe MIGRACION', 'MIGRACION', 2);
 
-IF NOT EXISTS (SELECT 1 FROM Lecciones WHERE Titulo = 'Introducción ASP.NET')
-INSERT INTO Lecciones (IdCurso, Titulo, Contenido, Orden)
-VALUES (@CursoAsp, 'Introducción ASP.NET', 'Conceptos básicos del framework.', 1);
+IF NOT EXISTS (SELECT 1 FROM dbo.Inscripciones WHERE IdUsuario = @AlumnoId AND IdCurso = @CursoAsp)
+INSERT INTO dbo.Inscripciones (IdUsuario, IdCurso, Estado, MetodoPago, ImportePagado)
+VALUES (@AlumnoId, @CursoAsp, 'ACTIVO', 'SIN_COSTE', 0);
 
-IF NOT EXISTS (SELECT 1 FROM Lecciones WHERE Titulo = 'MVC y Razor')
-INSERT INTO Lecciones (IdCurso, Titulo, Contenido, Orden)
-VALUES (@CursoAsp, 'MVC y Razor', 'Explicación del patrón MVC y Razor Views.', 2);
+DECLARE @LeccionAsp1 INT = (SELECT TOP 1 IdLeccion FROM dbo.Lecciones WHERE IdCurso = @CursoAsp AND Orden = 1);
+DECLARE @LeccionAsp2 INT = (SELECT TOP 1 IdLeccion FROM dbo.Lecciones WHERE IdCurso = @CursoAsp AND Orden = 2);
 
+IF @LeccionAsp1 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM dbo.Progreso WHERE IdUsuario = @AlumnoId AND IdLeccion = @LeccionAsp1)
+INSERT INTO dbo.Progreso (IdUsuario, IdLeccion, Completado)
+VALUES (@AlumnoId, @LeccionAsp1, 1);
 
---------------------------------------------------
--- LECCIONES SQL
---------------------------------------------------
+IF @LeccionAsp2 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM dbo.Progreso WHERE IdUsuario = @AlumnoId AND IdLeccion = @LeccionAsp2)
+INSERT INTO dbo.Progreso (IdUsuario, IdLeccion, Completado)
+VALUES (@AlumnoId, @LeccionAsp2, 0);
 
-IF NOT EXISTS (SELECT 1 FROM Lecciones WHERE Titulo = 'Fundamentos SQL')
-INSERT INTO Lecciones (IdCurso, Titulo, Contenido, Orden)
-VALUES (@CursoSql, 'Fundamentos SQL', 'SELECT, INSERT, UPDATE, DELETE.', 1);
-
-IF NOT EXISTS (SELECT 1 FROM Lecciones WHERE Titulo = 'Joins y Relaciones')
-INSERT INTO Lecciones (IdCurso, Titulo, Contenido, Orden)
-VALUES (@CursoSql, 'Joins y Relaciones', 'INNER JOIN, LEFT JOIN y relaciones.', 2);
-
-
---------------------------------------------------
--- INSCRIPCIÓN DEL ALUMNO
---------------------------------------------------
-
-IF NOT EXISTS (
-    SELECT 1 FROM Inscripciones 
-    WHERE IdUsuario = @AlumnoId AND IdCurso = @CursoAsp
-)
-INSERT INTO Inscripciones (IdUsuario, IdCurso, Estado)
-VALUES (@AlumnoId, @CursoAsp, 'ACTIVO');
-
-
---------------------------------------------------
--- PROGRESO DEL ALUMNO
---------------------------------------------------
-
-DECLARE @Leccion1 INT = (
-    SELECT IdLeccion FROM Lecciones 
-    WHERE Titulo = 'Introducción ASP.NET'
-);
-
-DECLARE @Leccion2 INT = (
-    SELECT IdLeccion FROM Lecciones 
-    WHERE Titulo = 'MVC y Razor'
-);
-
-IF NOT EXISTS (
-    SELECT 1 FROM Progreso 
-    WHERE IdUsuario = @AlumnoId AND IdLeccion = @Leccion1
-)
-INSERT INTO Progreso (IdUsuario, IdLeccion, Completado)
-VALUES (@AlumnoId, @Leccion1, 1);
-
-IF NOT EXISTS (
-    SELECT 1 FROM Progreso 
-    WHERE IdUsuario = @AlumnoId AND IdLeccion = @Leccion2
-)
-INSERT INTO Progreso (IdUsuario, IdLeccion, Completado)
-VALUES (@AlumnoId, @Leccion2, 0);
+PRINT 'Script ejecutado correctamente (modo idempotente).';
