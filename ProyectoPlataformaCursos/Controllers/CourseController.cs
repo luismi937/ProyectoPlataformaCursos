@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using ProyectoPlataformaCursos.Data;
 using ProyectoPlataformaCursos.Models;
 using ProyectoPlataformaCursos.Services;
 using ProyectoPlataformaCursos.Filters;
@@ -11,10 +14,12 @@ namespace ProyectoPlataformaCursos.Controllers
     public class CourseController : Controller
     {
         private readonly CourseService _courseService;
+        private readonly ApplicationDbContext _context;
 
-        public CourseController(CourseService courseService)
+        public CourseController(CourseService courseService, ApplicationDbContext context)
         {
             _courseService = courseService;
+            _context = context;
         }
 
         [AllowAnonymous]
@@ -47,8 +52,9 @@ namespace ProyectoPlataformaCursos.Controllers
 
         [Authorize(Roles = "PROFESOR,ADMIN")]
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            await CargarProfesoresAsync();
             return View();
         }
 
@@ -57,17 +63,30 @@ namespace ProyectoPlataformaCursos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Curso curso)
         {
+            await CargarProfesoresAsync();
+
             if (ModelState.IsValid)
             {
                 var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-                curso.IdProfesor = userId;
 
                 if (!User.IsInRole("ADMIN"))
                 {
+                    curso.IdProfesor = userId;
                     curso.Precio = 0;
                     curso.AceptaEfectivo = false;
                     curso.AceptaTarjeta = false;
                     curso.AceptaTransferencia = false;
+                }
+                else
+                {
+                    var profesorValido = await _context.Usuarios
+                        .AnyAsync(u => u.Id == curso.IdProfesor && u.Rol == "PROFESOR");
+
+                    if (!profesorValido)
+                    {
+                        ModelState.AddModelError(nameof(curso.IdProfesor), "Debes seleccionar un profesor válido.");
+                        return View(curso);
+                    }
                 }
 
                 await _courseService.CreateCursoAsync(curso);
@@ -93,6 +112,8 @@ namespace ProyectoPlataformaCursos.Controllers
                 return Forbid();
             }
 
+            await CargarProfesoresAsync();
+
             return View(curso);
         }
 
@@ -106,10 +127,34 @@ namespace ProyectoPlataformaCursos.Controllers
                 return NotFound();
             }
 
+            await CargarProfesoresAsync();
+
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            if (curso.IdProfesor != userId && !User.IsInRole("ADMIN"))
+            var cursoActual = await _courseService.GetCursoByIdAsync(id);
+            if (cursoActual == null)
+            {
+                return NotFound();
+            }
+
+            if (cursoActual.IdProfesor != userId && !User.IsInRole("ADMIN"))
             {
                 return Forbid();
+            }
+
+            if (!User.IsInRole("ADMIN"))
+            {
+                curso.IdProfesor = userId;
+            }
+            else
+            {
+                var profesorValido = await _context.Usuarios
+                    .AnyAsync(u => u.Id == curso.IdProfesor && u.Rol == "PROFESOR");
+
+                if (!profesorValido)
+                {
+                    ModelState.AddModelError(nameof(curso.IdProfesor), "Debes seleccionar un profesor válido.");
+                    return View(curso);
+                }
             }
 
             if (ModelState.IsValid)
@@ -119,6 +164,27 @@ namespace ProyectoPlataformaCursos.Controllers
                 return RedirectToAction(nameof(MisCursos));
             }
             return View(curso);
+        }
+
+        private async Task CargarProfesoresAsync()
+        {
+            if (!User.IsInRole("ADMIN"))
+            {
+                return;
+            }
+
+            var profesores = await _context.Usuarios
+                .Where(u => u.Rol == "PROFESOR")
+                .OrderBy(u => u.Nombre)
+                .ThenBy(u => u.Apellidos)
+                .Select(u => new
+                {
+                    u.Id,
+                    NombreCompleto = $"{u.Nombre} {u.Apellidos}"
+                })
+                .ToListAsync();
+
+            ViewBag.Profesores = new SelectList(profesores, "Id", "NombreCompleto");
         }
 
         [Authorize(Roles = "PROFESOR,ADMIN")]
